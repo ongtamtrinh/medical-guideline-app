@@ -1,0 +1,96 @@
+{
+  "name": "Tiếp cận bệnh nhân ngộ độc cấp",
+  "icd": "T65",
+  "icon": "🧪",
+  "category": "Hồi sức Chống độc",
+  "overview": "Xử trí ngộ độc cấp bao gồm hồi sức ổn định bệnh nhân, đánh giá nguy cơ, khử nhiễm, sử dụng thuốc giải độc đặc hiệu và tăng cường loại bỏ độc chất[cite: 592, 734]. Mục tiêu là ngăn ngừa hấp thu và giảm tối đa độc tính trên cơ quan đích[cite: 1210].",
+  "patho": "Độc chất (Xenobiotics) gây tổn thương cơ thể qua tương tác hóa học hoặc dược lý, cạnh tranh receptor hoặc ức chế các enzyme quan trọng (như Cholinesterase trong ngộ độc phospho hữu cơ)[cite: 591, 160, 161].",
+  "criteria": "Sáu bước tiếp cận ưu tiên[cite: 596, 667]:\n1. Ổn định bệnh nhân (ABCDE)\n2. Đánh giá lâm sàng và nguy cơ\n3. Ngăn ngừa hấp thu (Khử nhiễm)\n4. Dùng chất đối kháng (Antidote)\n5. Tăng cường loại bỏ độc chất\n6. Điều trị hỗ trợ và theo dõi",
+  "scoreTables": [
+    {
+      "name": "1. Hội chứng ngộ độc (Toxidromes)",
+      "desc": "Nhận diện hội chứng giúp định hướng tác nhân gây độc[cite: 125, 3695]:",
+      "rows": [
+        {"criteria": "Kích thích giao cảm", "details": "↑ HA, ↑ Mạch, ↑ Nhiệt độ, Giãn đồng tử, Đỏ da", "points": "Amphetamin, Cocain"},
+        {"criteria": "Hội chứng Opioid", "details": "↓ HA, ↓ Mạch, ↓ Nhịp thở, Đồng tử co nhỏ (điểm kim)", "points": "Heroin, Morphine"},
+        {"criteria": "Hội chứng Cholinergic", "details": "↓ Mạch, Co nhỏ đồng tử, Tăng tiết (SLUDGE), Co thắt PQ", "points": "Phospho hữu cơ, Carbamate"},
+        {"criteria": "Hội chứng Anticholinergic", "details": "↑ Mạch, Giãn đồng tử, Da khô đỏ, Liệt ruột, Bí tiểu", "points": "Atropin, Cà độc dược"},
+        {"criteria": "An thần gây ngủ", "details": "↓ HA, ↓ Nhịp thở, ↓ Phản xạ, Hôn mê, Co đồng tử", "points": "Benzodiazepine, Rượu"}
+      ]
+    },
+    {
+      "name": "2. Tiêu chuẩn nhập khoa HSTC (ICU)",
+      "desc": "Bệnh nhân có một trong các dấu hiệu sau cần theo dõi sát tại ICU[cite: 650, 1215]:",
+      "rows": [
+        {"criteria": "Hô hấp", "details": "Cần đặt NKQ, PaCO2 > 45 mmHg, Suy hô hấp cấp", "points": "Nặng"},
+        {"criteria": "Tuần hoàn", "details": "Choáng (Shock), Rối loạn nhịp nặng, QRS ≥ 0.12s", "points": "Nặng"},
+        {"criteria": "Thần kinh", "details": "Hôn mê (GCS < 8), Co giật kéo dài", "points": "Nặng"}
+      ]
+    }
+  ],
+  "clinical": "• Hỏi bệnh sử: Tên độc chất, liều lượng, thời điểm uống, mục đích (tự tử hay vô ý) [cite: 1217, 1382].\n• Khám sinh hiệu: Mạch, HA, Nhịp thở, Nhiệt độ, SpO2 [cite: 1221].\n• Khám tri giác: Glasgow, trạng thái đồng tử, dấu thần kinh khu trú [cite: 1221, 660].\n• Khám da niêm: Màu sắc da, độ ẩm, mùi hơi thở (mùi tỏi, hạnh nhân, rượu)[cite: 6, 21].",
+  "paraclinical": "• Xét nghiệm độc chất: Trong dịch dạ dày, máu, nước tiểu [cite: 127, 3697].\n• Xét nghiệm cơ bản: KMĐM (anion gap), Điện giải đồ, Chức năng gan (AST, ALT), Thận (BUN, Creatinine) [cite: 3697, 840].\n• Hình ảnh học: ECG (theo dõi QRS, QTc), X-quang phổi (phát hiện viêm phổi hít)[cite: 127, 177].",
+  "mindmap": "graph TD\n  A[BN Nghi Ngộ Độc] --> B{Hồi sức ABCDE}\n  B -->|Ổn định| C[Hỏi bệnh & Khám lâm sàng]\n  C --> D{Đánh giá nguy cơ}\n  D --> E[Khử nhiễm: Rửa dạ dày, Than hoạt]\n  D --> F[Dùng Antidote đặc hiệu]\n  D --> G[Tăng thải: Lọc máu, Kiềm hóa NT]\n  E & F & G --> H[Theo dõi biến chứng]",
+  "treatment": {
+    "nonpharma": "Nằm đầu cao hoặc nghiêng an toàn (tránh hít sặc)[cite: 818, 1460]. Thông khí hỗ trợ, thở Oxy[cite: 820, 865]. Thiết lập đường truyền tĩnh mạch, bù dịch ổn định huyết động[cite: 867, 917].",
+    "oralDrugs": [
+      {
+        "name": "Than hoạt (Activated Charcoal)",
+        "dose": "1g/kg thể trọng (Người lớn: 50-100g)",
+        "sideEffect": "Táo bón, buồn nôn, hít sặc",
+        "contraindication": "Thủng ruột, uống chất ăn mòn",
+        "note": "Hiệu quả nhất trong 1-2 giờ đầu [cite: 137, 705, 897]"
+      },
+      {
+        "name": "Sorbitol",
+        "dose": "2g/kg (Gấp đôi liều than hoạt)",
+        "sideEffect": "Đau bụng, tiêu chảy, mất điện giải",
+        "contraindication": "Tắc ruột",
+        "note": "Dùng kèm than hoạt để nhuận tràng [cite: 139, 764, 827]"
+      }
+    ],
+    "injectableDrugs": [
+      {
+        "name": "Atropin Sulfate",
+        "dose": "2-5mg IV mỗi 5-10 phút",
+        "sideEffect": "Khô miệng, nhịp nhanh, mê sảng",
+        "contraindication": "Không có",
+        "note": "Dùng trong ngộ độc Cholinergic đến khi đạt dấu thấm [cite: 855, 938]"
+      },
+      {
+        "name": "Naloxone",
+        "dose": "0.4mg IV chậm",
+        "sideEffect": "Hội chứng cai cấp",
+        "contraindication": "Mẫn cảm",
+        "note": "Giải độc nhóm Opioid (Heroin, Morphine) [cite: 740, 3689]"
+      },
+      {
+        "name": "Natri Bicarbonate 1.4% - 4.2%",
+        "dose": "1-2 mEq/kg bolus, sau đó duy trì",
+        "sideEffect": "Tăng Natri máu, hạ Kali",
+        "contraindication": "Phù phổi cấp",
+        "note": "Kiềm hóa nước tiểu tăng thải Salicylate, Phenobarbital [cite: 122, 1369]"
+      }
+    ],
+    "refs": [
+        {
+            "title": "Poisoning (The Lancet Seminar, 2019)",
+            "url": "https://doi.org/10.1016/S0140-6736(19)30006-8",
+            "doi": "10.1016/S0140-6736(19)30006-8"
+        },
+        {
+            "title": "Management of the poisoned patient (MJA, 2011)",
+            "url": "https://doi.org/10.5694/j.1326-5377.2011.tb03088.x",
+            "doi": "10.5694/j.1326-5377.2011.tb03088.x"
+        },
+        {
+            "title": "Hướng dẫn chẩn đoán và xử trí ngộ độc cấp - Bộ Y tế VN",
+            "url": "https://kcb.vn/van-ban/quyet-dinh-so-3610qd-byt-ngay-31082015"
+        },
+        {
+            "title": "Goldfrank's Toxicologic Emergencies, 11th Edition",
+            "url": "https://accesspharmacy.mhmedical.com/book.aspx?bookid=2569"
+        }
+    ]
+}}
+
