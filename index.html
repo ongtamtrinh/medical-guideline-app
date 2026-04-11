@@ -514,7 +514,6 @@ function renderDetail(p) {
   if(tr.principles) treatHtml += sec('🎯', '1. Nguyên tắc điều trị', tr.principles, tr.principles);
   if(tr.nonpharma || true) treatHtml += sec('🍏', '2. Điều trị không dùng thuốc', tr.nonpharma, tr.nonpharma);
 
-  // Backward compatible logic for old data
   let drugGroups = tr.drugGroups || [];
   if (!tr.drugGroups && (tr.oralDrugs?.length || tr.injectDrugs?.length)) {
       if (tr.oralDrugs?.length) drugGroups.push({ name: 'Thuốc uống', drugs: tr.oralDrugs });
@@ -627,9 +626,16 @@ document.getElementById('fileImport').addEventListener('change', function(e) {
   reader.onload = function(event) {
     try {
       const data = JSON.parse(event.target.result);
-      editingId = null; document.getElementById('modalTitle').textContent = 'Thêm phác đồ (Từ file)';
-      clearForm(); fillForm(data); openModal(); toast('Đã tải dữ liệu!');
-    } catch(err) { alert('Lỗi đọc file JSON!'); }
+      editingId = null; 
+      document.getElementById('modalTitle').textContent = 'Thêm phác đồ (Từ file)';
+      clearForm(); 
+      fillForm(data); 
+      openModal(); 
+      toast('Đã tải dữ liệu!');
+    } catch(err) { 
+      console.error(err);
+      alert('Lỗi chi tiết: ' + err.message + '\\n\\n*Gợi ý: Nếu có chữ "null", tức là trình duyệt đang chạy bản cũ chưa được cập nhật, hãy xoá cache trình duyệt (Ctrl+F5)!'); 
+    }
     e.target.value = '';
   };
   reader.readAsText(file);
