@@ -426,16 +426,29 @@ function copyText(text) {
   navigator.clipboard.writeText(text).then(() => toast('Đã copy vào clipboard!'));
 }
 
-// ── PERSIST ──────────────────────────────────────────────────────────────────
-async function persist() {
-  try { await window.storage.set('protocols_v7', JSON.stringify(protocols)); } catch(e) {}
-}
-async function loadStored() {
+// ── PERSIST (USING LOCALSTORAGE) ──────────────────────────────────────────────
+function persist() {
   try {
-    const r = await window.storage.get('protocols_v7');
-    if (r && r.value) protocols = JSON.parse(r.value);
-  } catch(e) {}
-  if (!protocols.length) loadSamples();
+    localStorage.setItem('protocols_v8', JSON.stringify(protocols));
+  } catch(e) {
+    console.error("Lỗi khi lưu vào localStorage", e);
+  }
+}
+function loadStored() {
+  try {
+    const data = localStorage.getItem('protocols_v8');
+    if (data) {
+      protocols = JSON.parse(data);
+    }
+  } catch(e) {
+    console.error("Lỗi khi đọc từ localStorage", e);
+  }
+  
+  if (!protocols || !protocols.length) {
+    loadSamples();
+    persist(); // Lưu mẫu mặc định vào local storage
+  }
+  
   buildSpecRow();
   applyFilters();
 }
@@ -807,8 +820,6 @@ document.getElementById('fileImport').addEventListener('change', function(e) {
     try {
       const data = JSON.parse(event.target.result);
       
-      // Khi load dữ liệu từ file thì sẽ hiển thị Modal để người dùng kiểm tra 
-      // trước khi thực sự lưu (giống như "Thêm phác đồ mới").
       editingId = null; 
       document.getElementById('modalTitle').textContent = 'Thêm phác đồ (Từ file)';
       clearForm();
@@ -819,7 +830,6 @@ document.getElementById('fileImport').addEventListener('change', function(e) {
     } catch(err) {
       alert('Lỗi đọc file JSON. Vui lòng kiểm tra lại định dạng file!');
     }
-    // Xóa value để có thể import lại cùng 1 file nếu cần
     e.target.value = '';
   };
   reader.readAsText(file);
