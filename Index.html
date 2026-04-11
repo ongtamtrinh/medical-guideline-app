@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" class="light">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>PhácĐồ MD - Mở rộng</title>
@@ -426,33 +427,26 @@ function copyText(text) {
   navigator.clipboard.writeText(text).then(() => toast('Đã copy vào clipboard!'));
 }
 
-// ── PERSIST (USING LOCALSTORAGE) ──────────────────────────────────────────────
-function persist() {
-  try {
-    localStorage.setItem('protocols_v8', JSON.stringify(protocols));
-  } catch(e) {
-    console.error("Lỗi khi lưu vào localStorage", e);
-  }
-}
-function loadStored() {
-  try {
-    const data = localStorage.getItem('protocols_v8');
-    if (data) {
-      protocols = JSON.parse(data);
-    }
-  } catch(e) {
-    console.error("Lỗi khi đọc từ localStorage", e);
-  }
-  
-  if (!protocols || !protocols.length) {
-    loadSamples();
-    persist(); // Lưu mẫu mặc định vào local storage
-  }
-  
+// ── SUPABASE CONFIG ──────────────────────────────────────────────────────────
+const SUPA_URL = 'https://csghhgzdaeernwickxii.supabase.co';      // 👈 thay URL của bạn
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzZ2hoZ3pkYWVlcm53aWNreGlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzI2ODIsImV4cCI6MjA5MTM0ODY4Mn0.ibU38G4JKnD-m0OWF-JcNUSNjcn_vT2FXrTBRqgULto';        // 👈 thay anon key của bạn
+const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ── PERSIST / LOAD ───────────────────────────────────────────────────────────
+async function loadStored() {
+  const { data, error } = await db
+    .from('protocols')
+    .select('*')
+    .order('updated_at', { ascending: false });
+  if (error) { console.error(error); protocols = []; }
+  else protocols = data || [];
   buildSpecRow();
   applyFilters();
 }
 
+async function persist() {
+  // không cần dùng nữa — lưu trực tiếp từng bản ghi qua saveProtocol()
+}
 // ── SPECIALTY ROW ─────────────────────────────────────────────────────────────
 function buildSpecRow() {
   const row = document.getElementById('specRow');
@@ -1032,18 +1026,19 @@ document.getElementById('btnEdit').addEventListener('click', () => {
   openModal();
 });
 
-document.getElementById('btnDelete').addEventListener('click', () => {
+document.getElementById('btnDelete').addEventListener('click', async () => {
   if (!currentId || !confirm('Bạn có chắc chắn muốn xóa phác đồ này?')) return;
+  const { error } = await db.from('protocols').delete().eq('id', currentId);
+  if (error) { alert('Lỗi khi xóa: ' + error.message); return; }
   protocols = protocols.filter(x => x.id !== currentId);
-  persist();
   closeDetail();
   applyFilters();
-  toast('Đã xóa phác đồ');
+  toast('🗑️ Đã xóa phác đồ');
 });
 
 document.getElementById('btnAddRef').addEventListener('click', () => addRefRow());
 
-document.getElementById('btnSave').addEventListener('click', () => {
+document.getElementById('btnSave').addEventListener('click', async () => {
   const name = document.getElementById('f-name').value.trim();
   if (!name) return alert('Vui lòng nhập tên bệnh');
 
@@ -1066,26 +1061,27 @@ document.getElementById('btnSave').addEventListener('click', () => {
       injectDrugs: getDrugs('injectBody'),
       intervention: document.getElementById('f-treat-interv').value.trim(),
       monitoring: document.getElementById('f-treat-monitor').value.trim(),
-      notes: document.getElementById('f-treat-notes').value.trim()
+      notes: document.getElementById('f-treat-notes').value.trim(),
     },
     refs: getRefs(),
-    updated: new Date().toLocaleDateString('vi-VN')
+    updated_at: new Date().toISOString(),
   };
+
+  const { error } = await db.from('protocols').upsert(p);
+  if (error) { alert('Lỗi khi lưu: ' + error.message); return; }
 
   if (editingId) {
     const idx = protocols.findIndex(x => x.id === editingId);
-    if (idx >= 0) protocols[idx] = p;
+    if (idx >= 0) protocols[idx] = p; else protocols.unshift(p);
   } else {
     protocols.unshift(p);
   }
 
-  persist();
   closeModal();
   applyFilters();
-  toast('Đã lưu phác đồ thành công');
+  toast('✅ Đã lưu phác đồ thành công');
   if (currentId === p.id) renderDetail(p);
 });
-
 // ── SAMPLE DATA ───────────────────────────────────────────────────────────────
 function loadSamples() {
   protocols = [
@@ -1132,7 +1128,7 @@ function loadSamples() {
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
 mermaid.initialize({ startOnLoad: false });
-loadStored();
+loadStored(); // async — tự động load từ Supabase
 </script>
 </body>
 </html>
