@@ -1,0 +1,101 @@
+{
+  "name": "Tiếp cận và Quản lý Bệnh nhân Xơ gan",
+  "icd": "K74.6",
+  "icon": "🩺",
+  "category": "Tiêu hóa",
+  "overview": "Xơ gan là giai đoạn cuối của quá trình xơ hóa gan mạn tính, tiến triển từ giai đoạn bù tiến triển (cACLD) sang mất bù. Quản lý tập trung vào ngăn ngừa các đợt mất bù đầu tiên, kiểm soát áp lực tĩnh mạch cửa và điều trị biến chứng.",
+  "patho": "Sự thay đổi cấu trúc nhu mô gan bằng các dải xơ lan tỏa và nốt tân sinh, dẫn đến tăng áp lực tĩnh mạch cửa (PH) và suy giảm chức năng tế bào gan. Viêm hệ thống mạn tính đóng vai trò then chốt trong các đợt mất bù cấp.",
+  "criteria": "1. Lâm sàng: Lòng bàn tay son, sao mạch, báng bụng, hội chứng suy tế bào gan.\n2. Hình ảnh học: Gan thô, bờ không đều trên siêu âm/CT; Giãn tĩnh mạch thực quản trên nội soi.\n3. NITs (Test không xâm lấn): Độ cứng gan (TE) > 15 kPa (xác chẩn cACLD).",
+  "scoreTables": [
+    {
+      "name": "1. Tiêu chuẩn Baveno VII (Sàng lọc tăng áp cửa)",
+      "desc": "Dùng để loại trừ nhu cầu nội soi tầm soát giãn tĩnh mạch thực quản (EV):",
+      "rows": [
+        {"criteria": "Loại trừ EV nguy cơ cao", "details": "TE < 20 kPa VÀ Tiểu cầu > 150.000/μL", "points": "Theo dõi hàng năm"},
+        {"criteria": "Nghi ngờ CSPH (Tăng áp cửa rõ)", "details": "TE ≥ 25 kPa", "points": "Nguy cơ mất bù cao"},
+        {"criteria": "Quy luật 5: 10-15-20-25", "details": "Đánh giá mức độ xơ hóa và dự báo tử vong", "points": "Dựa trên kPa"}
+      ]
+    },
+    {
+      "name": "2. Phân độ Child-Pugh",
+      "desc": "Đánh giá tiên lượng và dự trữ chức năng gadocument.getElementByIdn:",
+      "rows": [
+        {"criteria": "Child A", "details": "5 - 6 điểm", "points": "Xơ gan còn bù"},
+        {"criteria": "Child B", "details": "7 - 9 điểm", "points": "Xơ gan mất bù"},
+        {"criteria": "Child C", "details": "10 - 15 điểm", "points": "Mất bù nặng, tiên lượng xấu"}
+      ]
+    }
+  ],
+  "stepByStep": [
+    "Xác định giai đoạn: Còn bù (Compensated) hay Mất bù (Decompensated).",
+    "Sàng lọc tăng áp lực tĩnh mạch cửa theo tiêu chuẩn Baveno VII.",
+    "Tầm soát ung thư biểu mô tế bào gan (HCC) bằng siêu âm + AFP mỗi 6 tháng.",
+    "Điều trị nguyên nhân gốc (HBV, HCV, Rượu, MASLD) để đạt mục tiêu Tái bù (Recompensation).",
+    "Can thiệp dinh dưỡng và dự phòng nhiễm trùng."
+  ],
+  "treatment": {
+    "oralDrugs": [
+      {
+        "name": "Carvedilol (NSBB ưu tiên)",
+        "dose": "6.25mg/ngày, tăng lên 12.5mg/ngày",
+        "sideEffect": "Nhịp chậm, hạ huyết áp",
+        "contraindication": "Hen suyễn, AV block độ cao",
+        "note": "Hạ áp lực cửa hiệu quả hơn Propranolol nhờ tác dụng kháng alpha-1"
+      },
+      {
+        "name": "Spironolactone",
+        "dose": "100mg - 400mg/ngày",
+        "sideEffect": "Tăng Kali máu, vú to ở nam giới",
+        "contraindication": "Suy thận nặng, tăng Kali",
+        "note": "Kháng Aldosterone là nền tảng điều trị báng bụng"
+      },
+      {
+        "name": "Lactulose",
+        "dose": "15-30ml, 2-3 lần/ngày",
+        "sideEffect": "Đầy hơi, tiêu chảy, mất nước",
+        "contraindication": "Tắc ruột",
+        "note": "Chỉnh liều để đi tiêu 2-3 lần phân mềm/ngày (Trị HE)"
+      }
+    ],
+    "injectDrugs": [
+      {
+        "name": "Albumin người (20%)",
+        "dose": "8g/mỗi 1 lít dịch tháo (khi LVP > 5L)",
+        "sideEffect": "Quá tải tuần hoàn",
+        "contraindication": "Mẫn cảm",
+        "note": "Dự phòng rối loạn tuần hoàn sau chọc tháo (PPCD)"
+      },
+      {
+        "name": "Ceftriaxone",
+        "dose": "1g IV mỗi 24h",
+        "sideEffect": "Dị ứng, rối loạn tiêu hóa",
+        "contraindication": "Dị ứng Beta-lactam",
+        "note": "Dự phòng nhiễm trùng bắt buộc trong xuất huyết tiêu hóa"
+      },
+      {
+        "name": "Terlipressin",
+        "dose": "1-2mg IV mỗi 4-6h",
+        "sideEffect": "Đau bụng, thiếu máu cục bộ tạng",
+        "contraindication": "Bệnh tim thiếu máu cục bộ nặng",
+        "note": "Lựa chọn hàng đầu trong hội chứng gan thận (HRS) và VH"
+      }
+    ],
+    "intervention": "Thắt tĩnh mạch thực quản (EBL), TIPS (khi báng bụng kháng trị/VH tái phát), Ghép gan.",
+    "monitoring": "MELD-Na mỗi 3-6 tháng, Điện giải đồ, Chức năng thận, Siêu âm tầm soát HCC định kỳ.",
+    "notes": "Tránh tuyệt đối NSAIDs. Đảm bảo dinh dưỡng 35 kcal/kg và bữa ăn nhẹ trước ngủ (Late-night snack)."
+  },
+  "refs": [
+    {
+      "title": "EASL Clinical Practice Guidelines: Decompensated Cirrhosis",
+      "year": "2018/2022"
+    },
+    {
+      "title": "Baveno VII Faculty. Journal of Hepatology",
+      "year": "2022/2025 update"
+    },
+    {
+      "title": "AASLD Practice Guideline: Management of Cirrhosis",
+      "year": "2024"
+    }
+  ]
+}

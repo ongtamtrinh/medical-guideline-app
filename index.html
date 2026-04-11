@@ -36,18 +36,13 @@ body{font-family:'Inter',system-ui,sans-serif}
 .group:hover .copy-btn { opacity: 1; }
 .mm-container { overflow: hidden; position: relative; width: 100%; cursor: grab; }
 .mm-container:active { cursor: grabbing; }
-
-/* Score block styling in Modal */
 .score-block { transition: all 0.2s ease; }
-
-/* Details summary reset */
 details > summary { list-style: none; }
 details > summary::-webkit-details-marker { display: none; }
 </style>
 </head>
 <body class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-slate-200 min-h-screen">
 
-<!-- NAV -->
 <nav class="sticky top-0 z-40 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-sm">
   <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-14 gap-3">
     <div class="flex items-center gap-2 flex-shrink-0">
@@ -61,7 +56,6 @@ details > summary::-webkit-details-marker { display: none; }
           class="pl-7 pr-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"/>
       </div>
       
-      <!-- Nút nhập từ file -->
       <input type="file" id="fileImport" accept=".json" class="hidden" />
       <button id="btnImport" title="Nhập từ file JSON" class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300 text-sm px-2.5 py-1.5 rounded-lg transition flex-shrink-0">
         <span class="text-base leading-none">📥</span>
@@ -75,10 +69,8 @@ details > summary::-webkit-details-marker { display: none; }
   </div>
 </nav>
 
-<!-- DASHBOARD -->
 <main id="dashboard" class="max-w-7xl mx-auto px-4 py-6">
   <div id="specRow" class="flex gap-2.5 overflow-x-auto pb-2 mb-6 snap-x snap-mandatory"></div>
-
   <div class="flex items-center justify-between mb-4">
     <div>
       <h1 class="text-xl font-bold">Danh sách phác đồ</h1>
@@ -90,11 +82,9 @@ details > summary::-webkit-details-marker { display: none; }
   <div id="emptyState" class="hidden text-center py-20">
     <div class="text-5xl mb-3">📂</div>
     <p class="text-gray-400 text-lg font-medium">Không có phác đồ phù hợp</p>
-    <p class="text-gray-400 text-sm mt-1">Thử tìm kiếm khác hoặc thêm phác đồ mới</p>
   </div>
 </main>
 
-<!-- DETAIL VIEW -->
 <div id="detailView" class="hidden max-w-7xl mx-auto px-4 py-6">
   <div class="flex items-center gap-3 mb-5 flex-wrap">
     <button id="btnBack" class="text-sm text-gray-500 hover:text-blue-600 dark:text-slate-400 flex items-center gap-1 transition">← Quay lại</button>
@@ -133,19 +123,18 @@ details > summary::-webkit-details-marker { display: none; }
       <div id="tab-diagnosis" class="hidden"></div>
       <div id="tab-mindmap" class="hidden relative">
         <div class="absolute top-2 right-2 z-10 flex gap-1 bg-white dark:bg-slate-800 rounded-lg shadow border border-gray-200 dark:border-slate-700 p-1">
-          <button onclick="mmZoom(0.1)" class="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded text-xs" title="Zoom In">🔍+</button>
-          <button onclick="mmZoom(-0.1)" class="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded text-xs" title="Zoom Out">🔍-</button>
-          <button onclick="mmFit()" class="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded text-xs" title="Fit Screen">⛶</button>
+          <button onclick="mmZoom(0.1)" class="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded text-xs">🔍+</button>
+          <button onclick="mmZoom(-0.1)" class="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded text-xs">🔍-</button>
+          <button onclick="mmFit()" class="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded text-xs">⛶</button>
         </div>
         <div id="mindmap-content" class="mm-container bg-gray-50 dark:bg-slate-900 rounded-xl min-h-[400px]"></div>
       </div>
-      <div id="tab-treatment" class="hidden space-y-6"></div>
+      <div id="tab-treatment" class="hidden"></div>
       <div id="tab-refs" class="hidden"></div>
     </div>
   </div>
 </div>
 
-<!-- MODAL -->
 <div id="modalOverlay" class="hidden fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-8 px-4" style="background:rgba(0,0,0,.55);backdrop-filter:blur(3px)">
   <div class="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-4xl shadow-2xl border border-gray-100 dark:border-slate-700 my-auto">
     <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10 rounded-t-2xl">
@@ -154,7 +143,6 @@ details > summary::-webkit-details-marker { display: none; }
     </div>
     <div class="p-5 space-y-6 overflow-y-auto" style="max-height:75vh">
       
-      <!-- Basic Info -->
       <fieldset class="border border-gray-200 dark:border-slate-700 p-4 rounded-xl">
         <legend class="text-sm font-semibold px-2 text-blue-600 dark:text-blue-400">Thông tin cơ bản</legend>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -176,16 +164,15 @@ details > summary::-webkit-details-marker { display: none; }
         </div>
       </fieldset>
 
-      <!-- Clinical -->
       <fieldset class="border border-gray-200 dark:border-slate-700 p-4 rounded-xl">
         <legend class="text-sm font-semibold px-2 text-blue-600 dark:text-blue-400">Khám & Chẩn đoán</legend>
         <div class="space-y-4">
           <div><label class="field-label">Tổng quan</label>
             <textarea id="f-overview" rows="2" placeholder="Nội dung tổng quan…" class="field-input resize-y"></textarea></div>
+          <div><label class="field-label">Dịch tễ học</label>
+            <textarea id="f-epidemiology" rows="2" placeholder="Các yếu tố dịch tễ, lây truyền..." class="field-input resize-y"></textarea></div>
           <div><label class="field-label">Cơ chế bệnh sinh</label>
             <textarea id="f-patho" rows="2" placeholder="Cơ chế bệnh sinh…" class="field-input resize-y"></textarea></div>
-          <div><label class="field-label">Tiêu chuẩn chẩn đoán</label>
-            <textarea id="f-criteria" rows="2" placeholder="Các tiêu chuẩn chẩn đoán…" class="field-input resize-y"></textarea></div>
           
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label class="field-label">Lâm sàng</label>
@@ -193,138 +180,70 @@ details > summary::-webkit-details-marker { display: none; }
             <div><label class="field-label">Cận lâm sàng</label>
               <textarea id="f-paraclinical" rows="3" placeholder="Xét nghiệm, hình ảnh…" class="field-input resize-y"></textarea></div>
           </div>
+
+          <div><label class="field-label">Tiêu chuẩn chẩn đoán</label>
+            <textarea id="f-criteria" rows="2" placeholder="Các tiêu chuẩn chẩn đoán…" class="field-input resize-y"></textarea></div>
           
-          <!-- Bảng điểm Multi-blocks -->
           <div>
             <div class="flex items-center justify-between mb-2 mt-2">
-              <label class="field-label mb-0 text-blue-600 dark:text-blue-400 text-sm">Thang điểm / Bảng điểm (Tùy chọn)</label>
-              <button onclick="addScoreBlock()" class="text-xs font-semibold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 transition">＋ Thêm 1 thang điểm mới</button>
+              <label class="field-label mb-0 text-blue-600 dark:text-blue-400 text-sm">Thang điểm / Đánh giá chẩn đoán</label>
+              <button onclick="addScoreBlock()" class="text-xs font-semibold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded hover:bg-blue-100 transition">＋ Thêm khối chẩn đoán</button>
             </div>
+            <div class="text-xs text-gray-500 mb-3 italic">Ghi chú: Bạn có thể nhập nội dung văn bản tự do, nếu không nhập dữ liệu vào bảng, bảng sẽ tự động ẩn đi.</div>
             <div id="scoreBlocksContainer" class="space-y-4"></div>
           </div>
 
         </div>
       </fieldset>
 
-      <!-- Mindmap Editor -->
       <fieldset class="border border-gray-200 dark:border-slate-700 p-4 rounded-xl">
         <legend class="text-sm font-semibold px-2 text-blue-600 dark:text-blue-400">Sơ đồ Thuật toán (Mermaid)</legend>
-        
-        <!-- Hướng dẫn viết sơ đồ (Collapsible) -->
-        <details class="mb-4 group bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <summary class="cursor-pointer text-sm font-semibold text-blue-700 dark:text-blue-400 p-3 select-none flex items-center justify-between">
-            <span class="flex items-center gap-2">📖 Hướng dẫn nhanh vẽ sơ đồ thuật toán</span>
-            <span class="text-xs group-open:rotate-180 transition-transform duration-200">▼</span>
-          </summary>
-          <div class="p-3 pt-0 text-xs text-gray-700 dark:text-gray-300 space-y-2 border-t border-blue-100 dark:border-blue-800/50 mt-1">
-            <p><strong>1. Khai báo hướng:</strong> <code class="bg-white dark:bg-slate-800 px-1 rounded">flowchart TD</code> (Trên xuống) hoặc <code class="bg-white dark:bg-slate-800 px-1 rounded">flowchart LR</code> (Trái sang phải)</p>
-            <p><strong>2. Hình khối:</strong></p>
-            <ul class="list-disc list-inside pl-4 space-y-1">
-              <li>Hình chữ nhật (Bước thực hiện): <code class="bg-white dark:bg-slate-800 px-1 rounded">A[Nội dung]</code></li>
-              <li>Hình chữ nhật bo góc (Bắt đầu/Kết thúc): <code class="bg-white dark:bg-slate-800 px-1 rounded">B([Nội dung])</code></li>
-              <li>Hình thoi (Câu hỏi/Điều kiện): <code class="bg-white dark:bg-slate-800 px-1 rounded">C{Có sốt không?}</code></li>
-            </ul>
-            <p><strong>3. Mũi tên:</strong></p>
-            <ul class="list-disc list-inside pl-4 space-y-1">
-              <li>Chỉ thẳng: <code class="bg-white dark:bg-slate-800 px-1 rounded">A --> B</code></li>
-              <li>Có chữ ở giữa (TH 1): <code class="bg-white dark:bg-slate-800 px-1 rounded">A -->|Có| B</code></li>
-              <li>Có chữ ở giữa (TH 2): <code class="bg-white dark:bg-slate-800 px-1 rounded">A -- Không --> C</code></li>
-            </ul>
-            <div class="bg-white dark:bg-slate-800 p-2 rounded mt-2 font-mono text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">
-              flowchart TD<br>
-              &nbsp;&nbsp;A([BN nhập viện]) --> B{Suy hô hấp?}<br>
-              &nbsp;&nbsp;B -->|Có| C[Thở Oxy]<br>
-              &nbsp;&nbsp;B -->|Không| D[Đo Mạch, HA]
-            </div>
-          </div>
-        </details>
-
         <div class="flex gap-2 mb-2">
           <button onclick="insertMmTemplate('algorithm')" class="text-xs bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-slate-600">Template Thuật toán</button>
-          <button onclick="insertMmTemplate('sequence')" class="text-xs bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-slate-600">Timeline</button>
-          <button onclick="insertMmTemplate('gantt')" class="text-xs bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-slate-600">Gantt</button>
         </div>
-        <textarea id="f-mindmap" rows="6" placeholder="flowchart TD&#10;A[Bắt đầu] --> B{Điều kiện?}&#10;B -->|Đúng| C[Kết quả 1]" class="field-input font-mono resize-y"></textarea>
+        <textarea id="f-mindmap" rows="5" placeholder="flowchart TD..." class="field-input font-mono resize-y"></textarea>
       </fieldset>
 
-      <!-- Advanced Treatment -->
-      <fieldset class="border border-gray-200 dark:border-slate-700 p-4 rounded-xl">
+      <fieldset class="border border-gray-200 dark:border-slate-700 p-4 rounded-xl bg-blue-50/10 dark:bg-slate-800/20">
         <legend class="text-sm font-semibold px-2 text-blue-600 dark:text-blue-400">Chi tiết Điều trị</legend>
         
         <div class="space-y-6">
-          <!-- Non-pharma -->
           <div>
-            <label class="field-label">1. Điều trị không dùng thuốc (Dinh dưỡng, Lối sống...)</label>
-            <textarea id="f-treat-nonpharma" rows="2" placeholder="Chế độ ăn, tập luyện, tư thế..." class="field-input resize-y"></textarea>
+            <label class="field-label text-blue-700 dark:text-blue-400 text-sm">1. Nguyên tắc điều trị</label>
+            <textarea id="f-treat-principles" rows="2" placeholder="Mục tiêu và nguyên tắc cốt lõi..." class="field-input resize-y"></textarea>
           </div>
 
-          <!-- Oral Drugs -->
           <div>
-            <div class="flex items-center justify-between mb-2">
-              <label class="field-label mb-0 text-emerald-600 dark:text-emerald-400">2. Thuốc Uống (Oral)</label>
-              <button onclick="addDrugRow('oral')" class="text-xs text-blue-600 dark:text-blue-300 hover:underline">＋ Thêm thuốc uống</button>
-            </div>
-            <div class="overflow-x-auto rounded-lg border border-emerald-200 dark:border-emerald-900/50">
-              <table class="min-w-full text-xs">
-                <thead class="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">
-                  <tr>
-                    <th class="px-2 py-2 text-left font-semibold w-32">Tên thuốc</th>
-                    <th class="px-2 py-2 text-left font-semibold w-28">Liều dùng</th>
-                    <th class="px-2 py-2 text-left font-semibold">Tác dụng phụ</th>
-                    <th class="px-2 py-2 text-left font-semibold">CCĐ / Thận trọng</th>
-                    <th class="px-2 py-2 text-left font-semibold">Ghi chú</th>
-                    <th class="w-6"></th>
-                  </tr>
-                </thead>
-                <tbody id="oralBody"></tbody>
-              </table>
-            </div>
+            <label class="field-label text-blue-700 dark:text-blue-400 text-sm">2. Điều trị không dùng thuốc</label>
+            <textarea id="f-treat-nonpharma" rows="2" placeholder="Dinh dưỡng, Lối sống, Vận động, Hỗ trợ hô hấp..." class="field-input resize-y"></textarea>
           </div>
 
-          <!-- Inject Drugs -->
           <div>
             <div class="flex items-center justify-between mb-2">
-              <label class="field-label mb-0 text-rose-600 dark:text-rose-400">3. Thuốc Tiêm / Truyền (IV/IM/SC)</label>
-              <button onclick="addDrugRow('inject')" class="text-xs text-blue-600 dark:text-blue-300 hover:underline">＋ Thêm thuốc tiêm</button>
+              <label class="field-label mb-0 text-blue-700 dark:text-blue-400 text-sm">3. Điều trị thuốc (Theo vấn đề / Nhóm)</label>
+              <button onclick="addDrugGroup()" class="text-xs font-semibold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded hover:bg-emerald-100 transition">＋ Thêm nhóm thuốc mới</button>
             </div>
-            <div class="overflow-x-auto rounded-lg border border-rose-200 dark:border-rose-900/50">
-              <table class="min-w-full text-xs">
-                <thead class="bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400">
-                  <tr>
-                    <th class="px-2 py-2 text-left font-semibold w-32">Tên thuốc</th>
-                    <th class="px-2 py-2 text-left font-semibold w-28">Liều dùng / Pha</th>
-                    <th class="px-2 py-2 text-left font-semibold">Tác dụng phụ</th>
-                    <th class="px-2 py-2 text-left font-semibold">CCĐ / Thận trọng</th>
-                    <th class="px-2 py-2 text-left font-semibold">Ghi chú / Y lệnh</th>
-                    <th class="w-6"></th>
-                  </tr>
-                </thead>
-                <tbody id="injectBody"></tbody>
-              </table>
-            </div>
+            <div id="drugGroupsContainer" class="space-y-4"></div>
           </div>
 
-          <!-- Intervention -->
           <div>
-            <label class="field-label">4. Thủ thuật / Can thiệp / Phẫu thuật</label>
-            <textarea id="f-treat-interv" rows="2" placeholder="Đặt NKQ, Thở máy, Phẫu thuật..." class="field-input resize-y"></textarea>
+            <label class="field-label text-blue-700 dark:text-blue-400 text-sm">4. Thủ thuật / Can thiệp / Phẫu thuật</label>
+            <textarea id="f-treat-interv" rows="2" placeholder="Mô tả các thủ thuật can thiệp ngoại khoa hoặc chuyên sâu..." class="field-input resize-y"></textarea>
           </div>
 
-          <!-- Monitoring & Notes -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="field-label">5. Theo dõi (Monitoring)</label>
-              <textarea id="f-treat-monitor" rows="3" placeholder="Theo dõi sinh hiệu, SpO2, nước tiểu..." class="field-input resize-y"></textarea>
-            </div>
-            <div>
-              <label class="field-label">6. Lưu ý điều trị</label>
-              <textarea id="f-treat-notes" rows="3" placeholder="Các lưu ý đặc biệt, tiêu chuẩn xuất viện..." class="field-input resize-y"></textarea>
-            </div>
+          <div>
+            <label class="field-label text-rose-600 dark:text-rose-400 text-sm">5. Biến chứng (Chẩn đoán & Xử trí)</label>
+            <textarea id="f-treat-complications" rows="3" placeholder="Các biến chứng thường gặp và hướng xử trí..." class="field-input resize-y"></textarea>
           </div>
+
+          <div>
+            <label class="field-label text-purple-600 dark:text-purple-400 text-sm">6. Theo dõi (Monitoring)</label>
+            <textarea id="f-treat-monitor" rows="2" placeholder="Theo dõi sinh hiệu, xét nghiệm định kỳ, tiêu chuẩn xuất viện..." class="field-input resize-y"></textarea>
+          </div>
+
         </div>
       </fieldset>
 
-      <!-- References -->
       <fieldset class="border border-gray-200 dark:border-slate-700 p-4 rounded-xl">
         <legend class="text-sm font-semibold px-2 text-blue-600 dark:text-blue-400">Tài liệu tham khảo</legend>
         <button id="btnAddRef" class="text-xs text-blue-600 dark:text-blue-300 hover:underline mb-2">＋ Thêm tài liệu</button>
@@ -339,13 +258,11 @@ details > summary::-webkit-details-marker { display: none; }
   </div>
 </div>
 
-<!-- TOAST -->
 <div id="toast" class="fixed bottom-6 right-6 z-50 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2">
   <span id="toastMsg"></span>
 </div>
 
 <script>
-// ── CATEGORY CONFIG ───────────────────────────────────────────────────────────
 const CATS = {
   'Hô hấp':        { icon:'🫁', color:'blue',    hex:'#3b82f6', mermaid:'#bfdbfe' },
   'Tim mạch':      { icon:'❤️',  color:'rose',    hex:'#f43f5e', mermaid:'#fecdd3' },
@@ -384,10 +301,8 @@ const GRAD_DARK = {
   lime:'linear-gradient(135deg,#1a2e05 0%,#365314 100%)',
   gray:'linear-gradient(135deg,#1f2937 0%,#374151 100%)',
 };
-
 const SPEC_LIST = ['Hô hấp','Tim mạch','Tiêu hóa','Thần kinh','Nội tiết','Nhiễm','Hồi sức'];
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
 let protocols = [];
 let editingId = null;
 let currentId = null;
@@ -396,23 +311,16 @@ let dark = false;
 let mmScale = 1;
 let mmTranslate = {x:0, y:0};
 
-// ── THEME ─────────────────────────────────────────────────────────────────────
 document.getElementById('btnTheme').addEventListener('click', () => {
   dark = !dark;
   document.documentElement.classList.toggle('dark', dark);
   document.getElementById('btnTheme').textContent = dark ? '☀️' : '🌙';
   if(!document.getElementById('detailView').classList.contains('hidden')){
     const p = protocols.find(x => x.id === currentId);
-    if(p) {
-        renderDetail(p);
-        if(!document.getElementById('tab-mindmap').classList.contains('hidden')) {
-            renderMindmap();
-        }
-    }
+    if(p) { renderDetail(p); if(!document.getElementById('tab-mindmap').classList.contains('hidden')) renderMindmap(); }
   }
 });
 
-// ── TOAST ─────────────────────────────────────────────────────────────────────
 let toastTimer;
 function toast(msg) {
   const el = document.getElementById('toast');
@@ -422,36 +330,21 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
 }
 
-// ── COPY CLIPBOARD ────────────────────────────────────────────────────────────
-function copyText(text) {
-  navigator.clipboard.writeText(text).then(() => toast('Đã copy vào clipboard!'));
-}
+function copyText(text) { navigator.clipboard.writeText(text).then(() => toast('Đã copy vào clipboard!')); }
 
-// ── SUPABASE CONFIG ──────────────────────────────────────────────────────────
-const SUPA_URL = 'https://csghhgzdaeernwickxii.supabase.co';      // 👈 thay URL của bạn
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzZ2hoZ3pkYWVlcm53aWNreGlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzI2ODIsImV4cCI6MjA5MTM0ODY4Mn0.ibU38G4JKnD-m0OWF-JcNUSNjcn_vT2FXrTBRqgULto';        // 👈 thay anon key của bạn
+const SUPA_URL = 'https://csghhgzdaeernwickxii.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzZ2hoZ3pkYWVlcm53aWNreGlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzI2ODIsImV4cCI6MjA5MTM0ODY4Mn0.ibU38G4JKnD-m0OWF-JcNUSNjcn_vT2FXrTBRqgULto';
 const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
-// ── PERSIST / LOAD ───────────────────────────────────────────────────────────
 async function loadStored() {
-  const { data, error } = await db
-    .from('protocols')
-    .select('*')
-    .order('updated_at', { ascending: false });
-  if (error) { console.error(error); protocols = []; }
-  else protocols = data || [];
-  buildSpecRow();
-  applyFilters();
+  const { data, error } = await db.from('protocols').select('*').order('updated_at', { ascending: false });
+  protocols = data || [];
+  buildSpecRow(); applyFilters();
 }
 
-async function persist() {
-  // không cần dùng nữa — lưu trực tiếp từng bản ghi qua saveProtocol()
-}
-// ── SPECIALTY ROW ─────────────────────────────────────────────────────────────
 function buildSpecRow() {
   const row = document.getElementById('specRow');
   row.innerHTML = '';
-
   const all = document.createElement('button');
   all.className = 'spec-pill active flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-2xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-xs font-semibold text-gray-600 dark:text-slate-300 snap-start';
   all.dataset.spec = '';
@@ -479,12 +372,8 @@ function selectSpec(name) {
   applyFilters();
 }
 
-// ── FILTERS ───────────────────────────────────────────────────────────────────
 document.getElementById('searchInput').addEventListener('input', applyFilters);
-document.getElementById('btnClearFilter').addEventListener('click', () => {
-  document.getElementById('searchInput').value = '';
-  selectSpec('');
-});
+document.getElementById('btnClearFilter').addEventListener('click', () => { document.getElementById('searchInput').value = ''; selectSpec(''); });
 
 function applyFilters() {
   const q = document.getElementById('searchInput').value.toLowerCase();
@@ -509,8 +398,7 @@ function renderGrid(arr) {
     card.innerHTML = `
       <div class="flex-1">
         <div class="flex items-start gap-3 mb-3">
-          <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 shadow-sm"
-               style="background:color-mix(in srgb,${cfg.hex} 15%,white)">${p.icon}</div>
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 shadow-sm" style="background:color-mix(in srgb,${cfg.hex} 15%,white)">${p.icon}</div>
           <div class="flex-1 min-w-0">
             <h3 class="font-semibold text-sm leading-tight truncate">${p.name}</h3>
             <span class="text-xs font-mono" style="color:${cfg.hex}">${p.icd||'—'}</span>
@@ -518,8 +406,7 @@ function renderGrid(arr) {
         </div>
         <p class="text-xs text-gray-500 dark:text-slate-400 line-clamp-2 mb-3">${p.overview||'Chưa có mô tả.'}</p>
         <div class="flex items-center justify-between mt-auto">
-          <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full"
-            style="background:color-mix(in srgb,${cfg.hex} 12%,white);color:${cfg.hex}">${p.category}</span>
+          <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full" style="background:color-mix(in srgb,${cfg.hex} 12%,white);color:${cfg.hex}">${p.category}</span>
           <span class="text-xs text-gray-400">${p.updated||''}</span>
         </div>
       </div>`;
@@ -528,25 +415,15 @@ function renderGrid(arr) {
   });
 }
 
-// ── DETAIL ────────────────────────────────────────────────────────────────────
 function openDetail(id) {
-  currentId = id;
-  const p = protocols.find(x => x.id === id);
-  if (!p) return;
+  currentId = id; const p = protocols.find(x => x.id === id); if (!p) return;
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('detailView').classList.remove('hidden');
   renderDetail(p);
-  document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    b.className = 'tab-btn ' + (i === 0 ? 'tab-active' : 'tab-inactive') + ' px-4 py-3 text-sm whitespace-nowrap';
-  });
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.className = 'tab-btn ' + (i === 0 ? 'tab-active' : 'tab-inactive') + ' px-4 py-3 text-sm whitespace-nowrap');
   showTab('overview');
 }
-
-function closeDetail() {
-  currentId = null;
-  document.getElementById('dashboard').classList.remove('hidden');
-  document.getElementById('detailView').classList.add('hidden');
-}
+function closeDetail() { currentId = null; document.getElementById('dashboard').classList.remove('hidden'); document.getElementById('detailView').classList.add('hidden'); }
 
 function renderDetail(p) {
   const cfg = CATS[p.category] || CATS['Khác'];
@@ -568,31 +445,39 @@ function renderDetail(p) {
   document.getElementById('tab-mindmap').dataset.color = cfg.hex;
   document.getElementById('tab-mindmap').dataset.bgcolor = cfg.mermaid;
 
-  const sec = (e, t, content, rawText) => `<section class="mb-5 group relative">
-    <div class="flex items-center justify-between mb-2">
-      <h3 class="font-semibold text-sm flex items-center gap-1.5">${e} ${t}</h3>
-      <button onclick="copyText('${(rawText||content||'').replace(/\n/g,'\\n').replace(/'/g,"\\'")}')" class="copy-btn text-xs text-gray-400 hover:text-blue-500 flex items-center gap-1">📋 Copy</button>
-    </div>
-    <p class="text-sm text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">${content||'<span class="text-gray-400">Chưa có nội dung.</span>'}</p>
-  </section>`;
+  const sec = (e, t, content, rawText) => {
+    if(!content && t !== '2. Điều trị không dùng thuốc') return '';
+    return `<section class="mb-5 group relative">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-semibold text-sm flex items-center gap-1.5">${e} ${t}</h3>
+        <button onclick="copyText('${(rawText||content||'').replace(/\n/g,'\\n').replace(/'/g,"\\'")}')" class="copy-btn text-xs text-gray-400 hover:text-blue-500 flex items-center gap-1">📋 Copy</button>
+      </div>
+      <p class="text-sm text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">${content||'<span class="text-gray-400">Chưa có nội dung.</span>'}</p>
+    </section>`;
+  };
 
-  document.getElementById('tab-overview').innerHTML = sec('📝','Tổng quan',p.overview,p.overview) + sec('🧬','Cơ chế bệnh sinh',p.patho,p.patho);
+  // Tab Tổng Quát
+  document.getElementById('tab-overview').innerHTML =
+  sec('📝','Tổng quan', p.overview, p.overview) +
+  sec('🌍','Dịch tễ học', p.epidemiology, p.epidemiology) +
+  sec('🧬','Cơ chế bệnh sinh', p.patho, p.patho) +
+  `<div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-3 border-t border-gray-100 dark:border-slate-700">
+     ${sec('🩺','Lâm sàng', p.clinical, p.clinical)}
+     ${sec('🧪','Cận lâm sàng', p.paraclinical, p.paraclinical)}
+   </div>`;
   
   // Tab Chẩn đoán
   let diagHtml = sec('📌','Tiêu chuẩn chẩn đoán',p.criteria,p.criteria);
   
-  // Mảng Thang điểm mới
   if(p.scoreTables && p.scoreTables.length > 0) {
     let scoreSection = `<section class="mb-5">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="font-semibold text-sm flex items-center gap-1.5">🔢 Thang điểm / Bảng điểm</h3>
-      </div>
-      <div class="space-y-6">`;
+      <h3 class="font-semibold text-sm flex items-center gap-1.5 mb-3">🔢 Thang điểm / Đánh giá chẩn đoán</h3>
+      <div class="space-y-5">`;
       
     p.scoreTables.forEach(tbl => {
       let tHtml = `<div class="bg-gray-50/50 dark:bg-slate-800/30 border border-gray-100 dark:border-slate-700/60 rounded-xl p-4">`;
       if(tbl.name) tHtml += `<h4 class="font-semibold text-sm text-blue-700 dark:text-blue-300 mb-1">${tbl.name}</h4>`;
-      if(tbl.desc) tHtml += `<p class="text-xs text-gray-600 dark:text-slate-400 mb-3 whitespace-pre-wrap">${tbl.desc}</p>`;
+      if(tbl.desc) tHtml += `<p class="text-sm text-gray-700 dark:text-slate-300 mb-3 whitespace-pre-wrap">${tbl.desc}</p>`;
       
       if(tbl.rows && tbl.rows.length > 0) {
         let rowsHtml = tbl.rows.map(d => `<tr class="border-t border-gray-100 dark:border-slate-700/50 text-xs hover:bg-white dark:hover:bg-slate-800 transition-colors">
@@ -601,7 +486,7 @@ function renderDetail(p) {
           <td class="px-3 py-2 text-blue-600 dark:text-blue-400 font-bold text-center">${d.points||'—'}</td>
         </tr>`).join('');
         
-        tHtml += `<div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm">
+        tHtml += `<div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm mt-2">
           <table class="min-w-full">
             <thead class="bg-gray-100 dark:bg-slate-700 text-xs font-semibold text-gray-600 dark:text-slate-300">
               <tr>
@@ -617,99 +502,85 @@ function renderDetail(p) {
       tHtml += `</div>`;
       scoreSection += tHtml;
     });
-    
     scoreSection += `</div></section>`;
     diagHtml += scoreSection;
   }
+  document.getElementById('tab-diagnosis').innerHTML = diagHtml || '<p class="text-gray-400 text-sm">Chưa có thông tin chẩn đoán.</p>';
 
-  diagHtml += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-5">${sec('🩺','Lâm sàng',p.clinical,p.clinical)}${sec('🔬','Cận lâm sàng',p.paraclinical,p.paraclinical)}</div>`;
-  document.getElementById('tab-diagnosis').innerHTML = diagHtml;
-
-  // Render Treatment Tab
+  // Tab Điều trị
   let treatHtml = '';
-  const tr = p.treatment || { nonpharma:'', oralDrugs:[], injectDrugs:[], intervention:'', monitoring:'', notes:'' };
+  const tr = p.treatment || {};
   
-  if(tr.nonpharma) treatHtml += sec('🍏', 'Điều trị không dùng thuốc', tr.nonpharma, tr.nonpharma);
+  if(tr.principles) treatHtml += sec('🎯', '1. Nguyên tắc điều trị', tr.principles, tr.principles);
+  if(tr.nonpharma || true) treatHtml += sec('🍏', '2. Điều trị không dùng thuốc', tr.nonpharma, tr.nonpharma);
 
-  const renderDrugTable = (drugs, type, color, hex) => {
-    if(!drugs || !drugs.length) return '';
-    let rows = drugs.map(d => `<tr class="border-t border-${color}-100 dark:border-${color}-900/50 text-xs hover:bg-${color}-50 dark:hover:bg-${color}-900/20">
-      <td class="px-3 py-2 font-medium text-${color}-700 dark:text-${color}-300" style="border-left:3px solid ${hex}">${d.name||'—'}</td>
-      <td class="px-3 py-2">${d.dose||'—'}</td>
-      <td class="px-3 py-2 text-orange-600 dark:text-orange-400">${d.sideEffect||'—'}</td>
-      <td class="px-3 py-2 text-red-600 dark:text-red-400">${d.contraindication||'—'}</td>
-      <td class="px-3 py-2 text-gray-500">${d.note||'—'}</td>
-    </tr>`).join('');
-    
-    let copyTextStr = type + " Drugs:\n" + drugs.map(d => `- ${d.name}: ${d.dose}`).join('\n');
-    
-    return `<div class="mb-5 group relative">
-      <div class="flex items-center justify-between mb-2">
-        <h3 class="font-semibold text-sm flex items-center gap-1.5 text-${color}-600 dark:text-${color}-400">
-          ${type === 'Oral' ? '💊 Thuốc uống' : '💉 Thuốc tiêm/truyền'}
-        </h3>
-        <button onclick="copyText('${copyTextStr.replace(/\n/g,'\\n').replace(/'/g,"\\'")}')" class="copy-btn text-xs text-gray-400 hover:text-blue-500 flex items-center gap-1">📋 Copy</button>
-      </div>
-      <div class="overflow-x-auto rounded-xl border border-${color}-200 dark:border-${color}-900/50 shadow-sm">
-        <table class="min-w-full">
-          <thead class="bg-${color}-50 dark:bg-${color}-900/20 text-xs font-semibold text-${color}-700 dark:text-${color}-400">
-            <tr><th class="px-3 py-2 text-left">Tên thuốc</th><th class="px-3 py-2 text-left">Liều dùng</th>
-            <th class="px-3 py-2 text-left">Tác dụng phụ</th><th class="px-3 py-2 text-left">Chống chỉ định</th>
-            <th class="px-3 py-2 text-left">Ghi chú</th></tr></thead><tbody>${rows}</tbody>
-        </table>
-      </div>
-    </div>`;
-  };
-
-  treatHtml += renderDrugTable(tr.oralDrugs, 'Oral', 'emerald', '#10b981');
-  treatHtml += renderDrugTable(tr.injectDrugs, 'Inject', 'rose', '#f43f5e');
-
-  if(tr.intervention) treatHtml += sec('🔪', 'Thủ thuật / Can thiệp', tr.intervention, tr.intervention);
-  
-  if(tr.monitoring || tr.notes) {
-      treatHtml += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4 border-t border-gray-100 dark:border-slate-700">`;
-      if(tr.monitoring) treatHtml += sec('👁️', 'Theo dõi (Monitoring)', tr.monitoring, tr.monitoring);
-      if(tr.notes) treatHtml += sec('⚠️', 'Lưu ý điều trị', tr.notes, tr.notes);
-      treatHtml += `</div>`;
+  // Backward compatible logic for old data
+  let drugGroups = tr.drugGroups || [];
+  if (!tr.drugGroups && (tr.oralDrugs?.length || tr.injectDrugs?.length)) {
+      if (tr.oralDrugs?.length) drugGroups.push({ name: 'Thuốc uống', drugs: tr.oralDrugs });
+      if (tr.injectDrugs?.length) drugGroups.push({ name: 'Thuốc tiêm/truyền', drugs: tr.injectDrugs });
   }
 
-  if(!treatHtml) treatHtml = '<p class="text-gray-400 text-sm">Chưa có thông tin điều trị chi tiết.</p>';
-  document.getElementById('tab-treatment').innerHTML = treatHtml;
+  if(drugGroups && drugGroups.length > 0) {
+    let dHtml = `<div class="mb-6"><h3 class="font-semibold text-sm flex items-center gap-1.5 mb-3 text-emerald-600 dark:text-emerald-400">💊 3. Điều trị thuốc (Theo vấn đề)</h3><div class="space-y-5">`;
+    drugGroups.forEach(g => {
+      let rows = g.drugs.map(d => `<tr class="border-t border-gray-100 dark:border-slate-700/50 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+        <td class="px-3 py-2 font-medium text-emerald-700 dark:text-emerald-300 border-l-2 border-emerald-500">${d.name||'—'}</td>
+        <td class="px-3 py-2">${d.dose||'—'}</td>
+        <td class="px-3 py-2 text-red-600 dark:text-red-400">${d.contraindication||'—'}</td>
+        <td class="px-3 py-2 text-orange-600 dark:text-orange-400">${d.sideEffect||'—'}</td>
+        <td class="px-3 py-2 text-gray-500">${d.note||'—'}</td>
+      </tr>`).join('');
+      
+      let copyTextStr = g.name + ":\n" + g.drugs.map(d => `- ${d.name}: ${d.dose}`).join('\n');
+      dHtml += `<div class="group relative">
+        <div class="flex items-center justify-between mb-2">
+           <h4 class="font-semibold text-sm text-gray-800 dark:text-slate-200">⚗️ ${g.name}</h4>
+           <button onclick="copyText('${copyTextStr.replace(/\n/g,'\\n').replace(/'/g,"\\'")}')" class="copy-btn text-xs text-gray-400 hover:text-blue-500">📋 Copy nhóm này</button>
+        </div>
+        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm">
+          <table class="min-w-full">
+            <thead class="bg-gray-100 dark:bg-slate-700 text-xs font-semibold text-gray-600 dark:text-slate-300">
+              <tr><th class="px-3 py-2 text-left">Tên thuốc</th><th class="px-3 py-2 text-left">Liều dùng</th>
+              <th class="px-3 py-2 text-left">CCĐ / Thận trọng</th><th class="px-3 py-2 text-left">Tác dụng phụ</th>
+              <th class="px-3 py-2 text-left">Ghi chú</th></tr></thead><tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+    });
+    dHtml += `</div></div>`;
+    treatHtml += dHtml;
+  }
+
+  if(tr.intervention) treatHtml += sec('🔪', '4. Thủ thuật / Can thiệp / Phẫu thuật', tr.intervention, tr.intervention);
+  if(tr.complications) treatHtml += sec('⚠️', '5. Biến chứng (Chẩn đoán & Xử trí)', tr.complications, tr.complications);
+  if(tr.monitoring) treatHtml += sec('👁️', '6. Theo dõi (Monitoring)', tr.monitoring, tr.monitoring);
+
+  document.getElementById('tab-treatment').innerHTML = treatHtml || '<p class="text-gray-400 text-sm">Chưa có thông tin điều trị chi tiết.</p>';
 
   const ritems = (p.refs||[]).map((r,i) => `<div class="flex gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50">
     <span class="text-xs font-bold text-gray-400 mt-0.5 w-5 flex-shrink-0">${i+1}.</span>
-    <div>${r.url
-      ? `<a href="${r.url}" target="_blank" class="text-sm font-medium hover:underline" style="color:${cfg.hex}">${r.title||r.url}</a>
-         ${r.title?`<p class="text-xs text-gray-400 mt-0.5 break-all">${r.url}</p>`:''}`
-      : `<span class="text-sm text-gray-700 dark:text-slate-300">${r.title}</span>`}
-    </div></div>`).join('');
+    <div>${r.url ? `<a href="${r.url}" target="_blank" class="text-sm font-medium hover:underline" style="color:${cfg.hex}">${r.title||r.url}</a>${r.title?`<p class="text-xs text-gray-400 mt-0.5 break-all">${r.url}</p>`:''}` : `<span class="text-sm text-gray-700 dark:text-slate-300">${r.title}</span>`}</div></div>`).join('');
   document.getElementById('tab-refs').innerHTML = ritems || '<p class="text-gray-400 text-sm">Chưa có tài liệu tham khảo.</p>';
 }
 
-// ── TABS ─────────────────────────────────────────────────────────────────────
 function showTab(name) {
-  ['overview','diagnosis','mindmap','treatment','refs'].forEach(t =>
-    document.getElementById('tab-'+t).classList.toggle('hidden', t !== name));
-  if (name === 'mindmap') {
-    setTimeout(() => { mmFit(); renderMindmap(); }, 50);
-  }
+  ['overview','diagnosis','mindmap','treatment','refs'].forEach(t => document.getElementById('tab-'+t).classList.toggle('hidden', t !== name));
+  if (name === 'mindmap') { setTimeout(() => { mmFit(); renderMindmap(); }, 50); }
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', function() {
-    document.querySelectorAll('.tab-btn').forEach(b =>
-      b.className = 'tab-btn tab-inactive px-4 py-3 text-sm whitespace-nowrap');
+    document.querySelectorAll('.tab-btn').forEach(b => b.className = 'tab-btn tab-inactive px-4 py-3 text-sm whitespace-nowrap');
     this.className = 'tab-btn tab-active px-4 py-3 text-sm whitespace-nowrap';
     showTab(this.dataset.tab);
   });
 });
 
-// ── MERMAID ───────────────────────────────────────────────────────────────────
 function renderMindmap() {
   const container = document.getElementById('mindmap-content');
   const tab = document.getElementById('tab-mindmap');
   const code = (tab.dataset.code || '').trim();
-  
   const hex = tab.dataset.color || '#3b82f6';
   const bgHex = tab.dataset.bgcolor || '#bfdbfe';
   
@@ -720,126 +591,59 @@ function renderMindmap() {
   
   try {
     mermaid.initialize({
-      startOnLoad: false,
-      theme: 'base',
-      themeVariables: {
-        primaryColor: dark ? '#1e293b' : bgHex, 
-        primaryBorderColor: hex,
-        primaryTextColor: dark ? '#f1f5f9' : '#1e293b',
-        lineColor: dark ? '#64748b' : '#94a3b8',
-        background: 'transparent',
-        nodeBorder: hex,
-      }
+      startOnLoad: false, theme: 'base',
+      themeVariables: { primaryColor: dark ? '#1e293b' : bgHex, primaryBorderColor: hex, primaryTextColor: dark ? '#f1f5f9' : '#1e293b', lineColor: dark ? '#64748b' : '#94a3b8', background: 'transparent', nodeBorder: hex }
     });
-    mermaid.run({ nodes: [document.getElementById(id)] }).then(() => {
-      setupPanZoom(document.getElementById(id).querySelector('svg'));
-    });
-  } catch(e) {
-    container.innerHTML = `<div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 text-red-500 text-sm font-mono m-4">${e.message}</div>`;
-  }
+    mermaid.run({ nodes: [document.getElementById(id)] }).then(() => setupPanZoom(document.getElementById(id).querySelector('svg')));
+  } catch(e) { container.innerHTML = `<div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 text-red-500 text-sm font-mono m-4">${e.message}</div>`; }
 }
 
 let isDragging = false, startX, startY;
 function setupPanZoom(svg) {
   if(!svg) return;
-  mmScale = 1; mmTranslate = {x:0, y:0};
-  applyMmTransform(svg);
-  
+  mmScale = 1; mmTranslate = {x:0, y:0}; applyMmTransform(svg);
   const container = document.getElementById('mindmap-content');
-  container.onmousedown = (e) => {
-    isDragging = true;
-    startX = e.clientX - mmTranslate.x;
-    startY = e.clientY - mmTranslate.y;
-  };
-  container.onmousemove = (e) => {
-    if(!isDragging) return;
-    mmTranslate.x = e.clientX - startX;
-    mmTranslate.y = e.clientY - startY;
-    applyMmTransform(svg);
-  };
+  container.onmousedown = (e) => { isDragging = true; startX = e.clientX - mmTranslate.x; startY = e.clientY - mmTranslate.y; };
+  container.onmousemove = (e) => { if(!isDragging) return; mmTranslate.x = e.clientX - startX; mmTranslate.y = e.clientY - startY; applyMmTransform(svg); };
   container.onmouseup = () => isDragging = false;
   container.onmouseleave = () => isDragging = false;
-  
-  container.onwheel = (e) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    mmZoom(delta);
-  };
+  container.onwheel = (e) => { e.preventDefault(); mmZoom(e.deltaY > 0 ? -0.1 : 0.1); };
 }
-
-function applyMmTransform(svg) {
-  if(svg) svg.style.transform = `translate(${mmTranslate.x}px, ${mmTranslate.y}px) scale(${mmScale})`;
-}
-
+function applyMmTransform(svg) { if(svg) svg.style.transform = `translate(${mmTranslate.x}px, ${mmTranslate.y}px) scale(${mmScale})`; }
 function mmZoom(delta) {
-  const svg = document.querySelector('#mindmap-content svg');
-  if(!svg) return;
-  mmScale += delta;
-  if(mmScale < 0.2) mmScale = 0.2;
-  if(mmScale > 3) mmScale = 3;
-  applyMmTransform(svg);
+  const svg = document.querySelector('#mindmap-content svg'); if(!svg) return;
+  mmScale += delta; if(mmScale < 0.2) mmScale = 0.2; if(mmScale > 3) mmScale = 3; applyMmTransform(svg);
+}
+function mmFit() { mmScale = 1; mmTranslate = {x:0, y:0}; applyMmTransform(document.querySelector('#mindmap-content svg')); }
+
+function insertMmTemplate() {
+  document.getElementById('f-mindmap').value = `flowchart TD\n  A([Khám]) --> B{Nghi ngờ?}\n  B -->|Có| C[Nhập viện]\n  B -- Không --> D[Ngoại trú]`;
 }
 
-function mmFit() {
-  mmScale = 1; mmTranslate = {x:0, y:0};
-  const svg = document.querySelector('#mindmap-content svg');
-  if(svg) applyMmTransform(svg);
-}
-
-function insertMmTemplate(type) {
-  const txt = document.getElementById('f-mindmap');
-  let tpl = '';
-  if(type === 'algorithm') {
-    tpl = `flowchart TD\n  A([Bệnh nhân khám bệnh]) --> B{Có dấu hiệu nguy hiểm?}\n  B -->|Có| C[Chuyển Hồi sức cấp cứu]\n  B -- Không --> D[Thực hiện Cận lâm sàng]\n  D --> E{Kết quả bất thường?}\n  E -->|Có| F[Nhập viện theo dõi]\n  E -->|Không| G([Cho thuốc ngoại trú])`;
-  }
-  if(type === 'sequence') {
-    tpl = `sequenceDiagram\n  participant BN as Bệnh nhân\n  participant BS as Bác sĩ\n  BN->>BS: Khám bệnh\n  BS->>BN: Cho thuốc\n  Note right of BN: Uống sau ăn`;
-  }
-  if(type === 'gantt') {
-    tpl = `gantt\n  title Lịch trình điều trị\n  dateFormat YYYY-MM-DD\n  section Kháng sinh\n  Ceftriaxone IV :a1, 2024-01-01, 7d\n  section Thuốc uống\n  Paracetamol PO :a2, 2024-01-01, 3d`;
-  }
-  txt.value = tpl;
-}
-
-// ── IMPORT FILE ──────────────────────────────────────────────────────────────
-document.getElementById('btnImport').addEventListener('click', () => {
-  document.getElementById('fileImport').click();
-});
-
+document.getElementById('btnImport').addEventListener('click', () => document.getElementById('fileImport').click());
 document.getElementById('fileImport').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+  const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = function(event) {
     try {
       const data = JSON.parse(event.target.result);
-      
-      editingId = null; 
-      document.getElementById('modalTitle').textContent = 'Thêm phác đồ (Từ file)';
-      clearForm();
-      fillForm(data);
-      openModal();
-      
-      toast('Đã tải dữ liệu, vui lòng kiểm tra và Lưu');
-    } catch(err) {
-      alert('Lỗi đọc file JSON. Vui lòng kiểm tra lại định dạng file!');
-    }
+      editingId = null; document.getElementById('modalTitle').textContent = 'Thêm phác đồ (Từ file)';
+      clearForm(); fillForm(data); openModal(); toast('Đã tải dữ liệu!');
+    } catch(err) { alert('Lỗi đọc file JSON!'); }
     e.target.value = '';
   };
   reader.readAsText(file);
 });
 
-// ── MODAL ────────────────────────────────────────────────────────────────────
 function openModal() { document.getElementById('modalOverlay').classList.remove('hidden'); }
 function closeModal() { document.getElementById('modalOverlay').classList.add('hidden'); }
 
 function clearForm() {
-  ['f-name','f-icd','f-icon','f-overview','f-patho','f-criteria','f-clinical','f-paraclinical','f-mindmap','f-treat-nonpharma','f-treat-interv','f-treat-monitor','f-treat-notes']
-    .forEach(id => document.getElementById(id).value = '');
+  ['f-name','f-icd','f-icon','f-overview','f-epidemiology','f-patho','f-criteria','f-clinical','f-paraclinical','f-mindmap',
+   'f-treat-principles','f-treat-nonpharma','f-treat-interv','f-treat-complications','f-treat-monitor'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-cat').selectedIndex = 0;
   document.getElementById('scoreBlocksContainer').innerHTML = '';
-  document.getElementById('oralBody').innerHTML = '';
-  document.getElementById('injectBody').innerHTML = '';
+  document.getElementById('drugGroupsContainer').innerHTML = '';
   document.getElementById('refList').innerHTML = '';
 }
 
@@ -848,6 +652,7 @@ function fillForm(p) {
   document.getElementById('f-icd').value = p.icd || '';
   document.getElementById('f-icon').value = p.icon || '';
   document.getElementById('f-overview').value = p.overview || '';
+  document.getElementById('f-epidemiology').value = p.epidemiology || '';
   document.getElementById('f-patho').value = p.patho || '';
   document.getElementById('f-criteria').value = p.criteria || '';
   document.getElementById('f-clinical').value = p.clinical || '';
@@ -857,70 +662,56 @@ function fillForm(p) {
   const sel = document.getElementById('f-cat');
   for (let i = 0; i < sel.options.length; i++) if (sel.options[i].value === p.category) sel.selectedIndex = i;
   
-  // Render multi score blocks
-  document.getElementById('scoreBlocksContainer').innerHTML = '';
-  if(p.scoreTables && p.scoreTables.length > 0) {
-      p.scoreTables.forEach(tbl => addScoreBlock(tbl));
-  }
+  if(p.scoreTables && p.scoreTables.length > 0) p.scoreTables.forEach(tbl => addScoreBlock(tbl));
 
-  const tr = p.treatment || { nonpharma:'', oralDrugs:[], injectDrugs:[], intervention:'', monitoring:'', notes:'' };
+  const tr = p.treatment || {};
+  document.getElementById('f-treat-principles').value = tr.principles || '';
   document.getElementById('f-treat-nonpharma').value = tr.nonpharma || '';
   document.getElementById('f-treat-interv').value = tr.intervention || '';
+  document.getElementById('f-treat-complications').value = tr.complications || '';
   document.getElementById('f-treat-monitor').value = tr.monitoring || '';
-  document.getElementById('f-treat-notes').value = tr.notes || '';
   
-  document.getElementById('oralBody').innerHTML = '';
-  document.getElementById('injectBody').innerHTML = '';
-  (tr.oralDrugs || []).forEach(d => addDrugRow('oral', d));
-  (tr.injectDrugs || []).forEach(d => addDrugRow('inject', d));
+  let drugGroups = tr.drugGroups || [];
+  if (!tr.drugGroups && (tr.oralDrugs?.length || tr.injectDrugs?.length)) {
+      if (tr.oralDrugs?.length) drugGroups.push({ name: 'Thuốc uống', drugs: tr.oralDrugs });
+      if (tr.injectDrugs?.length) drugGroups.push({ name: 'Thuốc tiêm/truyền', drugs: tr.injectDrugs });
+  }
+  drugGroups.forEach(g => addDrugGroup(g));
 
-  document.getElementById('refList').innerHTML = '';
   (p.refs || []).forEach(r => addRefRow(r));
 }
 
-// ── MULTI SCORE BLOCKS ───────────────────────────────────────────────────────
 function addScoreBlock(data = {}) {
   const container = document.getElementById('scoreBlocksContainer');
   const blockId = 'sb_' + Date.now() + Math.floor(Math.random() * 100);
-  
   const block = document.createElement('div');
   block.className = 'score-block border border-gray-200 dark:border-slate-600 p-3 rounded-lg bg-gray-50/50 dark:bg-slate-800/30';
   block.dataset.blockId = blockId;
   
   block.innerHTML = `
     <div class="flex items-center justify-between mb-2">
-      <input type="text" placeholder="Tên thang điểm (VD: 1. Thang điểm CURB-65)..." value="${data.name||''}" class="f-sb-name field-input font-semibold text-blue-700 dark:text-blue-300 !bg-white dark:!bg-slate-900 border-none shadow-sm !py-1.5"/>
-      <button type="button" class="del-block text-red-400 hover:text-red-600 ml-2 text-xl px-1">✕</button>
+      <input type="text" placeholder="Tên khối (VD: Thang điểm CURB-65)..." value="${data.name||''}" class="f-sb-name field-input font-semibold text-blue-700 dark:text-blue-300 border-none shadow-sm !py-1.5 w-full mr-2"/>
+      <button type="button" class="del-block text-red-400 hover:text-red-600 text-xl px-1">✕</button>
     </div>
-    <textarea rows="1" placeholder="Mô tả, đánh giá kết quả (VD: 0-1 điểm: Ngoại trú...)" class="f-sb-desc field-input resize-y mb-3 text-sm">${data.desc||''}</textarea>
+    <textarea rows="2" placeholder="Nội dung tự do, mô tả, diễn giải kết quả..." class="f-sb-desc field-input resize-y mb-3 text-sm">${data.desc||''}</textarea>
     
     <div class="flex items-center justify-end mb-2">
-      <button type="button" onclick="addScoreRowToBlock('${blockId}')" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">＋ Thêm hàng tiêu chí</button>
+      <button type="button" onclick="addScoreRowToBlock('${blockId}')" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">＋ Thêm hàng vào bảng</button>
     </div>
     <div class="overflow-x-auto rounded border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800">
       <table class="min-w-full text-xs">
         <thead class="bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300">
-          <tr>
-            <th class="px-2 py-2 text-left font-semibold w-[30%]">Tiêu chí / Dấu hiệu</th>
-            <th class="px-2 py-2 text-left font-semibold w-[50%]">Phân loại / Giá trị</th>
-            <th class="px-2 py-2 text-center font-semibold w-[20%]">Điểm</th>
-            <th class="w-6"></th>
-          </tr>
+          <tr><th class="px-2 py-2 text-left w-[30%]">Tiêu chí</th><th class="px-2 py-2 text-left w-[50%]">Phân loại</th><th class="px-2 py-2 text-center w-[20%]">Điểm</th><th class="w-6"></th></tr>
         </thead>
         <tbody class="sb-tbody"></tbody>
       </table>
     </div>
   `;
-  
   block.querySelector('.del-block').addEventListener('click', () => block.remove());
   container.appendChild(block);
   
   const tbody = block.querySelector('.sb-tbody');
-  if(data.rows && data.rows.length > 0) {
-      data.rows.forEach(r => _createScoreRowEl(tbody, r));
-  } else {
-      _createScoreRowEl(tbody, {});
-  }
+  if(data.rows && data.rows.length > 0) data.rows.forEach(r => _createScoreRowEl(tbody, r));
 }
 
 function addScoreRowToBlock(blockId) {
@@ -932,12 +723,8 @@ function _createScoreRowEl(tbody, d = {}) {
   const tr = document.createElement('tr');
   tr.className = `border-t border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/50`;
   const fields = ['criteria','details','points'];
-  tr.innerHTML = fields.map(f =>
-    `<td class="px-2 py-1.5"><div contenteditable="true" data-f="${f}"
-      class="text-xs text-gray-700 dark:text-slate-300 min-h-[18px] outline-none focus:bg-gray-100 dark:focus:bg-slate-700 p-1 rounded">${d[f]||''}</div></td>`
-  ).join('') +
-  `<td class="px-1 text-center"><button type="button" class="del-srow text-red-400 hover:text-red-600 text-base leading-none font-bold">×</button></td>`;
-  
+  tr.innerHTML = fields.map(f => `<td class="px-2 py-1.5"><div contenteditable="true" data-f="${f}" class="text-xs text-gray-700 dark:text-slate-300 min-h-[18px] outline-none focus:bg-gray-100 dark:focus:bg-slate-700 p-1 rounded">${d[f]||''}</div></td>`).join('') +
+  `<td class="px-1 text-center"><button type="button" class="del-srow text-red-400 hover:text-red-600 font-bold">×</button></td>`;
   tr.querySelector('.del-srow').addEventListener('click', () => tr.remove());
   tbody.appendChild(tr);
 }
@@ -947,83 +734,92 @@ function getScoreTables() {
       const name = block.querySelector('.f-sb-name').value.trim();
       const desc = block.querySelector('.f-sb-desc').value.trim();
       const rows = Array.from(block.querySelectorAll('.sb-tbody tr')).map(tr => {
-          const obj = {};
-          tr.querySelectorAll('[data-f]').forEach(el => obj[el.dataset.f] = el.textContent.trim());
-          return obj;
+          const obj = {}; tr.querySelectorAll('[data-f]').forEach(el => obj[el.dataset.f] = el.textContent.trim()); return obj;
       }).filter(d => d.criteria || d.details || d.points);
-      
       return { name, desc, rows };
   }).filter(t => t.name || t.desc || t.rows.length > 0);
 }
 
-// ── DRUG ROW ─────────────────────────────────────────────────────────────────
-function addDrugRow(type, d = {}) {
+// ── DRUG GROUPS ──
+function addDrugGroup(data = {}) {
+  const container = document.getElementById('drugGroupsContainer');
+  const groupId = 'dg_' + Date.now() + Math.floor(Math.random() * 100);
+  
+  const div = document.createElement('div');
+  div.className = 'border border-emerald-200 dark:border-emerald-900/50 p-3 rounded-lg bg-emerald-50/30 dark:bg-slate-800/50';
+  div.dataset.groupId = groupId;
+  div.innerHTML = `
+    <div class="flex items-center justify-between mb-3 border-b border-emerald-100 dark:border-emerald-900 pb-2">
+      <input type="text" placeholder="Tên vấn đề / Nhóm thuốc (VD: Kiểm soát huyết áp, Kháng sinh)..." value="${data.name||''}" class="dg-name field-input font-semibold text-emerald-700 dark:text-emerald-400 border-none shadow-sm !py-1.5 w-full mr-2"/>
+      <button type="button" class="text-red-400 hover:text-red-600 text-xl px-1" onclick="this.closest('[data-group-id]').remove()">✕</button>
+    </div>
+    <div class="flex justify-end mb-2">
+      <button type="button" onclick="addDrugToGroup('${groupId}')" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">＋ Thêm thuốc</button>
+    </div>
+    <div class="overflow-x-auto rounded border border-gray-200 dark:border-slate-600">
+      <table class="min-w-full text-xs">
+        <thead class="bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300">
+          <tr><th class="px-2 py-2 text-left">Tên thuốc</th><th class="px-2 py-2 text-left">Liều dùng</th>
+          <th class="px-2 py-2 text-left">CCĐ / Thận trọng</th><th class="px-2 py-2 text-left">Tác dụng phụ</th>
+          <th class="px-2 py-2 text-left">Ghi chú</th><th class="w-6"></th></tr>
+        </thead>
+        <tbody class="dg-tbody"></tbody>
+      </table>
+    </div>
+  `;
+  container.appendChild(div);
+  if(data.drugs && data.drugs.length > 0) data.drugs.forEach(d => _createDrugRow(div.querySelector('.dg-tbody'), d));
+  else _createDrugRow(div.querySelector('.dg-tbody'), {});
+}
+
+function addDrugToGroup(groupId) {
+    const group = document.querySelector(`[data-group-id="${groupId}"]`);
+    if(group) _createDrugRow(group.querySelector('.dg-tbody'), {});
+}
+
+function _createDrugRow(tbody, d = {}) {
   const tr = document.createElement('tr');
-  const isOral = type === 'oral';
-  const color = isOral ? 'emerald' : 'rose';
-  tr.className = `border-t border-${color}-100 dark:border-${color}-900/50 bg-white dark:bg-slate-800`;
-  
-  const fields = ['name','dose','sideEffect','contraindication','note'];
-  tr.innerHTML = fields.map(f =>
-    `<td class="px-2 py-1.5"><div contenteditable="true" data-f="${f}"
-      class="text-xs text-gray-700 dark:text-slate-300 min-h-[18px] outline-none focus:bg-${color}-50 dark:focus:bg-${color}-900/30 p-1 rounded">${d[f]||''}</div></td>`
-  ).join('') +
-  `<td class="px-1 text-center"><button class="del-drug text-red-400 hover:text-red-600 text-base leading-none font-bold">×</button></td>`;
-  
-  tr.querySelector('.del-drug').addEventListener('click', () => tr.remove());
-  document.getElementById(isOral ? 'oralBody' : 'injectBody').appendChild(tr);
+  tr.className = 'border-t border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800';
+  const fields = ['name','dose','contraindication','sideEffect','note'];
+  tr.innerHTML = fields.map(f => `<td class="px-2 py-1.5"><div contenteditable="true" data-f="${f}" class="text-xs text-gray-700 dark:text-slate-300 min-h-[18px] outline-none focus:bg-gray-50 dark:focus:bg-slate-700 p-1 rounded">${d[f]||''}</div></td>`).join('') +
+  `<td class="px-1 text-center"><button type="button" class="text-red-400 hover:text-red-600 font-bold" onclick="this.closest('tr').remove()">×</button></td>`;
+  tbody.appendChild(tr);
 }
 
-function getDrugs(tbodyId) {
-  return Array.from(document.querySelectorAll(`#${tbodyId} tr`)).map(tr => {
-    const obj = {};
-    tr.querySelectorAll('[data-f]').forEach(el => obj[el.dataset.f] = el.textContent.trim());
-    return obj;
-  }).filter(d => d.name);
+function getDrugGroups() {
+  return Array.from(document.querySelectorAll('#drugGroupsContainer > div')).map(group => {
+      const name = group.querySelector('.dg-name').value.trim();
+      const drugs = Array.from(group.querySelectorAll('.dg-tbody tr')).map(tr => {
+          const obj = {}; tr.querySelectorAll('[data-f]').forEach(el => obj[el.dataset.f] = el.textContent.trim()); return obj;
+      }).filter(d => d.name);
+      return { name, drugs };
+  }).filter(g => g.name || g.drugs.length > 0);
 }
 
-// ── REF ROW ──────────────────────────────────────────────────────────────────
 function addRefRow(r = {}) {
   const div = document.createElement('div');
   div.className = 'flex gap-2 items-start';
-  div.innerHTML = `
-    <div class="flex-1 space-y-1">
-      <input type="text" placeholder="Tên tài liệu..." value="${r.title||''}" class="f-ref-title field-input py-1 text-xs"/>
-      <input type="text" placeholder="URL (nếu có)..." value="${r.url||''}" class="f-ref-url field-input py-1 text-xs text-blue-600 dark:text-blue-400"/>
-    </div>
-    <button class="del-ref text-red-400 hover:text-red-600 text-lg leading-none p-1">×</button>`;
+  div.innerHTML = `<div class="flex-1 space-y-1"><input type="text" placeholder="Tên tài liệu..." value="${r.title||''}" class="f-ref-title field-input py-1 text-xs"/><input type="text" placeholder="URL (nếu có)..." value="${r.url||''}" class="f-ref-url field-input py-1 text-xs text-blue-600"/></div><button class="del-ref text-red-400 hover:text-red-600 text-lg p-1">×</button>`;
   div.querySelector('.del-ref').addEventListener('click', () => div.remove());
   document.getElementById('refList').appendChild(div);
 }
-
 function getRefs() {
-  return Array.from(document.querySelectorAll('#refList > div')).map(div => ({
-    title: div.querySelector('.f-ref-title').value.trim(),
-    url: div.querySelector('.f-ref-url').value.trim()
-  })).filter(r => r.title || r.url);
+  return Array.from(document.querySelectorAll('#refList > div')).map(div => ({ title: div.querySelector('.f-ref-title').value.trim(), url: div.querySelector('.f-ref-url').value.trim() })).filter(r => r.title || r.url);
 }
 
-// ── EVENTS ────────────────────────────────────────────────────────────────────
 document.getElementById('btnBack').addEventListener('click', closeDetail);
 document.getElementById('btnCloseModal').addEventListener('click', closeModal);
 document.getElementById('btnCancelModal').addEventListener('click', closeModal);
 
 document.getElementById('btnAdd').addEventListener('click', () => {
-  editingId = null;
-  document.getElementById('modalTitle').textContent = 'Thêm phác đồ mới';
-  clearForm();
-  addScoreBlock();
-  openModal();
+  editingId = null; document.getElementById('modalTitle').textContent = 'Thêm phác đồ mới';
+  clearForm(); addScoreBlock(); addDrugGroup(); openModal();
 });
 
 document.getElementById('btnEdit').addEventListener('click', () => {
-  if (!currentId) return;
-  const p = protocols.find(x => x.id === currentId);
-  if (!p) return;
-  editingId = currentId;
-  document.getElementById('modalTitle').textContent = 'Chỉnh sửa phác đồ';
-  fillForm(p);
-  openModal();
+  if (!currentId) return; const p = protocols.find(x => x.id === currentId); if (!p) return;
+  editingId = currentId; document.getElementById('modalTitle').textContent = 'Chỉnh sửa phác đồ';
+  clearForm(); fillForm(p); openModal();
 });
 
 document.getElementById('btnDelete').addEventListener('click', async () => {
@@ -1031,9 +827,7 @@ document.getElementById('btnDelete').addEventListener('click', async () => {
   const { error } = await db.from('protocols').delete().eq('id', currentId);
   if (error) { alert('Lỗi khi xóa: ' + error.message); return; }
   protocols = protocols.filter(x => x.id !== currentId);
-  closeDetail();
-  applyFilters();
-  toast('🗑️ Đã xóa phác đồ');
+  closeDetail(); applyFilters(); toast('🗑️ Đã xóa phác đồ');
 });
 
 document.getElementById('btnAddRef').addEventListener('click', () => addRefRow());
@@ -1049,6 +843,7 @@ document.getElementById('btnSave').addEventListener('click', async () => {
     icon: document.getElementById('f-icon').value.trim() || '📝',
     category: document.getElementById('f-cat').value,
     overview: document.getElementById('f-overview').value.trim(),
+    epidemiology: document.getElementById('f-epidemiology').value.trim(),
     patho: document.getElementById('f-patho').value.trim(),
     criteria: document.getElementById('f-criteria').value.trim(),
     scoreTables: getScoreTables(),
@@ -1056,12 +851,12 @@ document.getElementById('btnSave').addEventListener('click', async () => {
     paraclinical: document.getElementById('f-paraclinical').value.trim(),
     mindmap: document.getElementById('f-mindmap').value.trim(),
     treatment: {
+      principles: document.getElementById('f-treat-principles').value.trim(),
       nonpharma: document.getElementById('f-treat-nonpharma').value.trim(),
-      oralDrugs: getDrugs('oralBody'),
-      injectDrugs: getDrugs('injectBody'),
+      drugGroups: getDrugGroups(),
       intervention: document.getElementById('f-treat-interv').value.trim(),
+      complications: document.getElementById('f-treat-complications').value.trim(),
       monitoring: document.getElementById('f-treat-monitor').value.trim(),
-      notes: document.getElementById('f-treat-notes').value.trim(),
     },
     refs: getRefs(),
     updated_at: new Date().toISOString(),
@@ -1073,62 +868,14 @@ document.getElementById('btnSave').addEventListener('click', async () => {
   if (editingId) {
     const idx = protocols.findIndex(x => x.id === editingId);
     if (idx >= 0) protocols[idx] = p; else protocols.unshift(p);
-  } else {
-    protocols.unshift(p);
-  }
+  } else { protocols.unshift(p); }
 
-  closeModal();
-  applyFilters();
-  toast('✅ Đã lưu phác đồ thành công');
+  closeModal(); applyFilters(); toast('✅ Đã lưu phác đồ thành công');
   if (currentId === p.id) renderDetail(p);
 });
-// ── SAMPLE DATA ───────────────────────────────────────────────────────────────
-function loadSamples() {
-  protocols = [
-    {
-      id:'s1', name:'Viêm phổi cộng đồng (CAP)', icd:'J18.9', icon:'🫁', category:'Hô hấp',
-      overview:'Viêm phổi cộng đồng là tình trạng nhiễm trùng nhu mô phổi xảy ra ở ngoài bệnh viện.',
-      patho:'Vi khuẩn/Virus xâm nhập qua đường hô hấp → vượt qua hàng rào bảo vệ → sinh sôi tại phế nang → đáp ứng viêm → xuất tiết dịch viêm → đông đặc nhu mô.',
-      criteria:'1. Triệu chứng hô hấp cấp tính (ho, khạc đàm, đau ngực...)\n2. Triệu chứng toàn thân (sốt...)\n3. XQ ngực: tổn thương đông đặc mới',
-      scoreTables: [
-        {
-          name: "1. Thang điểm CURB-65",
-          desc: "Đánh giá độ nặng và nơi điều trị:\n• 0-1 điểm: Điều trị ngoại trú\n• 2 điểm: Nhập viện điều trị\n• 3-5 điểm: Nhập ICU",
-          rows: [
-            {criteria: 'C (Confusion)', details: 'Rối loạn tri giác', points: '1'},
-            {criteria: 'U (Urea)', details: 'BUN > 19 mg/dL (> 7 mmol/L)', points: '1'},
-            {criteria: 'R (Respiratory rate)', details: 'Nhịp thở ≥ 30 lần/phút', points: '1'},
-            {criteria: 'B (Blood pressure)', details: 'HA tâm thu < 90 mmHg hoặc tâm trương ≤ 60 mmHg', points: '1'},
-            {criteria: '65', details: 'Tuổi ≥ 65', points: '1'},
-          ]
-        }
-      ],
-      clinical:'• Ho khạc đàm đục/mủ\n• Sốt cao, lạnh run\n• Đau ngực kiểu màng phổi\n• Thở nhanh, ran nổ',
-      paraclinical:'• XQ ngực thẳng: đám mờ phế nang\n• CTM: BC tăng, CRP/PCT tăng\n• Cấy đờm/máu (trước kháng sinh)',
-      mindmap:`flowchart TD\n  A([Khám lâm sàng & XQ ngực]) --> B{Chẩn đoán CAP?}\n  B -- Không --> C([Tìm nguyên nhân khác])\n  B -- Có --> D[Đánh giá CURB-65 / PSI]\n  D --> E{CURB-65}\n  E -->|0-1 điểm| F[Điều trị ngoại trú]\n  E -->|2 điểm| G[Nhập viện Nội khoa]\n  E -->|3-5 điểm| H[Nhập ICU]\n  F --> I([Amoxicillin / Macrolide])\n  G --> J([Beta-lactam IV + Macrolide])\n  H --> K([Beta-lactam IV + FQ / Macrolide IV])`,
-      treatment: {
-        nonpharma: '• Nghỉ ngơi tại giường, uống nhiều nước\n• Thở oxy nếu SpO2 < 92%\n• Vỗ rung long đờm nếu cần',
-        oralDrugs: [
-          {name:'Amoxicillin',dose:'1g × 3/ngày',sideEffect:'Tiêu chảy',contraindication:'Dị ứng Penicillin',note:'Ngoại trú nhẹ'},
-          {name:'Azithromycin',dose:'500mg/ngày × 5 ngày',sideEffect:'Rối loạn tiêu hóa',contraindication:'QTc dài',note:'Nghi Atypical'}
-        ],
-        injectDrugs: [
-          {name:'Ceftriaxone',dose:'2g/ngày IV',sideEffect:'Dị ứng',contraindication:'Dị ứng Cephalosporin',note:'Nhập viện trung bình/nặng'},
-          {name:'Levofloxacin',dose:'750mg/ngày IV',sideEffect:'Đứt gân, QTc',contraindication:'Động kinh',note:'Dị ứng Penicillin / Nặng'}
-        ],
-        intervention: '• Đặt nội khí quản thở máy nếu suy hô hấp cấp nặng\n• Dẫn lưu màng phổi nếu có tràn dịch MP lượng nhiều/mủ',
-        monitoring: '• Sinh hiệu: Mạch, HA, Nhịp thở, Nhiệt độ mỗi 4-6h\n• Theo dõi SpO2 liên tục nếu suy hô hấp\n• Lượng nước tiểu 24h\n• Đánh giá lại lâm sàng và CRP/PCT sau 48-72h',
-        notes: '• Kháng sinh cần được cho sớm nhất có thể, lý tưởng trong vòng 4h sau khi nhập viện.\n• Chuyển từ đường tiêm sang đường uống khi lâm sàng ổn định, hết sốt >24h và đường tiêu hóa bình thường.'
-      },
-      refs:[{title:'IDSA/ATS CAP Guidelines 2007',url:'https://doi.org/10.1086/511159'}],
-      updated: new Date().toLocaleDateString('vi-VN')
-    }
-  ];
-}
 
-// ── INIT ─────────────────────────────────────────────────────────────────────
 mermaid.initialize({ startOnLoad: false });
-loadStored(); // async — tự động load từ Supabase
+loadStored();
 </script>
 </body>
 </html>
