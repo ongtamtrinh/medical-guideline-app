@@ -1,526 +1,1128 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClinicalGuide - Hệ thống Phác đồ Y tế</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>
-        body { margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-        /* Loại bỏ thanh cuộn ngang nếu có */
-        * { box-sizing: border-box; }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>PhácĐồ MD - Mở rộng</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif']}}}}</script>
+<style>
+*{box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:4px}
+.card-hover{transition:transform .18s,box-shadow .18s}
+.card-hover:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.12)}
+.dark .card-hover:hover{box-shadow:0 10px 28px rgba(0,0,0,.4)}
+.tab-active{border-bottom:2px solid #3b82f6;color:#3b82f6;font-weight:600}
+.tab-inactive{color:#6b7280;border-bottom:2px solid transparent}
+.dark .tab-inactive{color:#94a3b8}
+[contenteditable]:focus{outline:2px solid #3b82f6;outline-offset:1px;border-radius:3px}
+#toast{transition:opacity .3s;opacity:0;pointer-events:none}
+#toast.show{opacity:1}
+.mermaid svg{max-width:100%;height:auto;transform-origin:0 0;transition:transform 0.2s ease;}
+.spec-pill{transition:all .18s}
+.spec-pill.active{box-shadow:0 0 0 2px #3b82f6,0 0 0 4px #fff}
+.dark .spec-pill.active{box-shadow:0 0 0 2px #3b82f6,0 0 0 4px #0f172a}
+.field-label{display:block;font-size:.7rem;font-weight:600;color:#6b7280;margin-bottom:.25rem}
+.dark .field-label{color:#94a3b8}
+.field-input{width:100%;border-radius:.5rem;border:1px solid #e5e7eb;background:#f9fafb;padding:.5rem .75rem;font-size:.875rem;transition:box-shadow .15s}
+.field-input:focus{outline:none;box-shadow:0 0 0 2px #3b82f6}
+.dark .field-input{border-color:#475569;background:#1e293b;color:#e2e8f0}
+.copy-btn { opacity: 0; transition: opacity 0.2s; }
+.group:hover .copy-btn { opacity: 1; }
+.mm-container { overflow: hidden; position: relative; width: 100%; cursor: grab; }
+.mm-container:active { cursor: grabbing; }
+
+/* Score block styling in Modal */
+.score-block { transition: all 0.2s ease; }
+
+/* Details summary reset */
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+</style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-slate-200 min-h-screen">
 
-    <script type="text/babel">
-        const { useState, useMemo } = React;
+<!-- NAV -->
+<nav class="sticky top-0 z-40 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-14 gap-3">
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <span class="text-xl">🩺</span>
+      <span class="font-bold text-lg text-blue-700 dark:text-blue-300">PhácĐồ<span class="text-blue-500">MD</span></span>
+    </div>
+    <div class="flex items-center gap-2 flex-1 max-w-lg">
+      <div class="relative flex-1">
+        <span class="absolute left-2.5 top-2 text-gray-400 text-xs">🔍</span>
+        <input id="searchInput" type="text" placeholder="Tìm tên bệnh, ICD…"
+          class="pl-7 pr-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"/>
+      </div>
+      
+      <!-- Nút nhập từ file -->
+      <input type="file" id="fileImport" accept=".json" class="hidden" />
+      <button id="btnImport" title="Nhập từ file JSON" class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300 text-sm px-2.5 py-1.5 rounded-lg transition flex-shrink-0">
+        <span class="text-base leading-none">📥</span>
+      </button>
 
-        /* ─── THEME ─── */
-        const T = {
-            dark:  { bg:"#0f1117", card:"#1a1d27", border:"#2a2d3e", text:"#e2e8f0", muted:"#94a3b8", accent:"#3b82f6", danger:"#ef4444", warn:"#f59e0b", success:"#10b981", surface:"#141720", input:"#1e2130", purple:"#a78bfa", teal:"#14b8a6" },
-            light: { bg:"#f0f4f8", card:"#ffffff", border:"#e2e8f0", text:"#1e293b", muted:"#64748b", accent:"#2563eb", danger:"#dc2626", warn:"#d97706", success:"#059669", surface:"#f8fafc", input:"#f1f5f9", purple:"#7c3aed", teal:"#0d9488" },
-        };
+      <button id="btnAdd" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1.5 rounded-lg transition flex-shrink-0">
+        <span class="text-base leading-none">＋</span><span class="hidden sm:inline">Thêm phác đồ</span>
+      </button>
+      <button id="btnTheme" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition text-lg">🌙</button>
+    </div>
+  </div>
+</nav>
 
-        /* ─── DATA ─── */
-        const GUIDELINES = [
-            {
-                id:"sep-001", title:"Sốc Nhiễm Khuẩn", subtitle:"Septic Shock",
-                icd:"A41.9", dept:"Hồi sức cấp cứu", version:"3.2",
-                updated:"2024-11-15", priority:"emergency",
-                authors:["TS. Nguyễn Văn An","PGS. Trần Thị Bình"],
-                tags:["Nhiễm khuẩn","Vận mạch","ICU","Lactate","SOFA"],
-                color:"#ef4444", icon:"🫀",
-                sections:["Định nghĩa & Tiêu chuẩn","Dấu hiệu nguy hiểm","Xử trí ban đầu","Liều kháng sinh","Hồi sức dịch","Hướng dẫn điều dưỡng","Theo dõi"],
-                drugs:["Noradrenalin","Dopamin","Ampicillin-Sulbactam"],
-                refs:4, views:1284, saves:312,
-                relatedIds:["cap-001","se-001"],
-            },
-            {
-                id:"cap-001", title:"Viêm phổi Cộng đồng", subtitle:"Community-Acquired Pneumonia",
-                icd:"J18.9", dept:"Nội hô hấp", version:"2.1",
-                updated:"2024-09-10", priority:"urgent",
-                authors:["ThS. Lê Quang Hưng","TS. Phạm Thị Lan"],
-                tags:["Hô hấp","Kháng sinh","CURB-65","Nội trú","Ngoại trú"],
-                color:"#3b82f6", icon:"🫁",
-                sections:["Chẩn đoán & CURB-65","Dấu hiệu nguy hiểm","Sơ đồ xử trí","Phác đồ kháng sinh","Hướng dẫn điều dưỡng","Theo dõi & Xuất viện"],
-                drugs:["Amoxicillin-Clavulanate","Azithromycin","Ceftriaxone"],
-                refs:4, views:987, saves:241,
-                relatedIds:["sep-001","se-001"],
-            },
-            {
-                id:"se-001", title:"Trạng thái Động kinh", subtitle:"Status Epilepticus",
-                icd:"G41.9", dept:"Thần kinh / ICU", version:"2.0",
-                updated:"2024-10-01", priority:"emergency",
-                authors:["PGS. Nguyễn Đình Toàn","ThS. Trần Minh Khoa"],
-                tags:["Thần kinh","Benzodiazepine","EEG","Gây mê","Kháng trị"],
-                color:"#8b5cf6", icon:"🧠",
-                sections:["Định nghĩa & Phân loại","Dấu hiệu nguy hiểm","Đồng hồ xử trí","Phác đồ theo thời gian","Tính liều thuốc","Hướng dẫn điều dưỡng"],
-                drugs:["Lorazepam","Fosphenytoin","Levetiracetam","Midazolam"],
-                refs:5, views:743, saves:189,
-                relatedIds:["sep-001","cap-001"],
-            },
-            {
-                id:"ami-001", title:"Nhồi máu cơ tim cấp", subtitle:"Acute Myocardial Infarction",
-                icd:"I21.9", dept:"Tim mạch can thiệp", version:"1.8",
-                updated:"2024-08-20", priority:"emergency",
-                authors:["GS. Phạm Gia Khải","TS. Ngô Thị Thu"],
-                tags:["Tim mạch","PCI","Aspirin","Heparin","STEMI","NSTEMI"],
-                color:"#f59e0b", icon:"❤️",
-                sections:["Phân loại STEMI/NSTEMI","ECG chẩn đoán","Xử trí cấp cứu","Chiến lược tái tưới máu","Thuốc chống đông","Phục hồi chức năng"],
-                drugs:["Aspirin","Clopidogrel","Heparin","Tenecteplase"],
-                refs:6, views:1102, saves:298,
-                relatedIds:["sep-001"],
-            },
-            {
-                id:"dm2-001", title:"Đái tháo đường type 2", subtitle:"Type 2 Diabetes Mellitus",
-                icd:"E11.9", dept:"Nội tiết", version:"4.0",
-                updated:"2024-07-01", priority:"routine",
-                authors:["PGS. Tạ Văn Bình","ThS. Lê Thị Hoa"],
-                tags:["Nội tiết","Insulin","HbA1c","Metformin","Lối sống"],
-                color:"#10b981", icon:"🩸",
-                sections:["Tiêu chuẩn chẩn đoán","Mục tiêu điều trị","Phác đồ thuốc uống","Liệu pháp Insulin","Theo dõi biến chứng","Giáo dục bệnh nhân"],
-                drugs:["Metformin","Glipizide","Insulin Glargine","Empagliflozin"],
-                refs:5, views:856, saves:220,
-                relatedIds:["sep-001"],
-            },
-            {
-                id:"stroke-001", title:"Đột quỵ thiếu máu cục bộ", subtitle:"Ischemic Stroke",
-                icd:"I63.9", dept:"Thần kinh mạch máu", version:"2.3",
-                updated:"2024-06-15", priority:"emergency",
-                authors:["TS. Lê Văn Thành","BS. Nguyễn Kim Châu"],
-                tags:["Thần kinh","tPA","Thrombectomy","NIHSS","IV Alteplase"],
-                color:"#14b8a6", icon:"🧬",
-                sections:["NIHSS & Đánh giá ban đầu","Chẩn đoán hình ảnh","Tiêu sợi huyết IV tPA","Can thiệp lấy huyết khối","Chăm sóc đơn vị đột quỵ","Phòng ngừa thứ phát"],
-                drugs:["Alteplase (tPA)","Aspirin","Atorvastatin","Clopidogrel"],
-                refs:7, views:934, saves:267,
-                relatedIds:["se-001","ami-001"],
-            },
-        ];
+<!-- DASHBOARD -->
+<main id="dashboard" class="max-w-7xl mx-auto px-4 py-6">
+  <div id="specRow" class="flex gap-2.5 overflow-x-auto pb-2 mb-6 snap-x snap-mandatory"></div>
 
-        const DEPTS = ["Tất cả", "Hồi sức cấp cứu", "Nội hô hấp", "Thần kinh / ICU", "Tim mạch can thiệp", "Nội tiết", "Thần kinh mạch máu"];
-        const PRIORITIES = { emergency:"Khẩn cấp", urgent:"Ưu tiên", routine:"Thông thường" };
-        const PCOLORS = { emergency:"#ef4444", urgent:"#f59e0b", routine:"#10b981" };
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h1 class="text-xl font-bold">Danh sách phác đồ</h1>
+      <p id="countLabel" class="text-xs text-gray-500 dark:text-slate-400 mt-0.5"></p>
+    </div>
+    <button id="btnClearFilter" class="hidden text-xs text-blue-600 dark:text-blue-300 hover:underline flex items-center gap-1">✕ Bỏ lọc</button>
+  </div>
+  <div id="cardGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5"></div>
+  <div id="emptyState" class="hidden text-center py-20">
+    <div class="text-5xl mb-3">📂</div>
+    <p class="text-gray-400 text-lg font-medium">Không có phác đồ phù hợp</p>
+    <p class="text-gray-400 text-sm mt-1">Thử tìm kiếm khác hoặc thêm phác đồ mới</p>
+  </div>
+</main>
 
-        /* ─── COMPONENTS ─── */
-        function Badge({ color, children, sm }) {
-            return <span style={{ background:color+"22", color, border:`1px solid ${color}44`, borderRadius:6, padding: sm?"1px 7px":"2px 10px", fontSize: sm?10:11, fontWeight:600, whiteSpace:"nowrap" }}>{children}</span>;
+<!-- DETAIL VIEW -->
+<div id="detailView" class="hidden max-w-7xl mx-auto px-4 py-6">
+  <div class="flex items-center gap-3 mb-5 flex-wrap">
+    <button id="btnBack" class="text-sm text-gray-500 hover:text-blue-600 dark:text-slate-400 flex items-center gap-1 transition">← Quay lại</button>
+    <span class="h-4 w-px bg-gray-300 dark:bg-slate-600"></span>
+    <span id="detailBreadcrumb" class="font-semibold text-blue-600 dark:text-blue-300 text-sm"></span>
+    <div class="ml-auto flex gap-2">
+      <button id="btnEdit" class="flex items-center gap-1.5 text-sm bg-white/80 dark:bg-slate-800 text-gray-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">✏️ Chỉnh sửa</button>
+      <button id="btnDelete" class="flex items-center gap-1.5 text-sm bg-red-50 dark:bg-red-900/20 text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-100 transition">🗑️ Xóa</button>
+    </div>
+  </div>
+  
+  <div id="detailHeader" class="rounded-2xl p-6 mb-4 shadow-sm">
+    <div class="flex items-start gap-4">
+      <div id="detailIcon" class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 bg-white/30 backdrop-blur-sm shadow"></div>
+      <div>
+        <h2 id="detailName" class="text-2xl font-bold"></h2>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <span id="detailICD" class="text-xs font-mono bg-white/30 backdrop-blur-sm px-2.5 py-0.5 rounded-full font-semibold"></span>
+          <span id="detailCat" class="text-xs bg-white/20 backdrop-blur-sm px-2.5 py-0.5 rounded-full"></span>
+          <span id="detailDate" class="text-xs opacity-70"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm overflow-hidden">
+    <div class="flex border-b border-gray-100 dark:border-slate-700 overflow-x-auto">
+      <button class="tab-btn tab-active px-4 py-3 text-sm whitespace-nowrap" data-tab="overview">📋 Tổng quát</button>
+      <button class="tab-btn tab-inactive px-4 py-3 text-sm whitespace-nowrap" data-tab="diagnosis">🔬 Chẩn đoán</button>
+      <button class="tab-btn tab-inactive px-4 py-3 text-sm whitespace-nowrap" data-tab="mindmap">🗺️ Thuật toán</button>
+      <button class="tab-btn tab-inactive px-4 py-3 text-sm whitespace-nowrap" data-tab="treatment">🩻 Điều trị</button>
+      <button class="tab-btn tab-inactive px-4 py-3 text-sm whitespace-nowrap" data-tab="refs">📚 Tài liệu</button>
+    </div>
+    <div class="p-5 sm:p-6">
+      <div id="tab-overview"></div>
+      <div id="tab-diagnosis" class="hidden"></div>
+      <div id="tab-mindmap" class="hidden relative">
+        <div class="absolute top-2 right-2 z-10 flex gap-1 bg-white dark:bg-slate-800 rounded-lg shadow border border-gray-200 dark:border-slate-700 p-1">
+          <button onclick="mmZoom(0.1)" class="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded text-xs" title="Zoom In">🔍+</button>
+          <button onclick="mmZoom(-0.1)" class="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded text-xs" title="Zoom Out">🔍-</button>
+          <button onclick="mmFit()" class="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded text-xs" title="Fit Screen">⛶</button>
+        </div>
+        <div id="mindmap-content" class="mm-container bg-gray-50 dark:bg-slate-900 rounded-xl min-h-[400px]"></div>
+      </div>
+      <div id="tab-treatment" class="hidden space-y-6"></div>
+      <div id="tab-refs" class="hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modalOverlay" class="hidden fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-8 px-4" style="background:rgba(0,0,0,.55);backdrop-filter:blur(3px)">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-4xl shadow-2xl border border-gray-100 dark:border-slate-700 my-auto">
+    <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10 rounded-t-2xl">
+      <h2 id="modalTitle" class="font-bold text-lg">Thêm phác đồ mới</h2>
+      <button id="btnCloseModal" class="text-xl text-gray-400 hover:text-gray-600 dark:hover:text-white px-2 transition">✕</button>
+    </div>
+    <div class="p-5 space-y-6 overflow-y-auto" style="max-height:75vh">
+      
+      <!-- Basic Info -->
+      <fieldset class="border border-gray-200 dark:border-slate-700 p-4 rounded-xl">
+        <legend class="text-sm font-semibold px-2 text-blue-600 dark:text-blue-400">Thông tin cơ bản</legend>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label class="field-label">Tên bệnh <span class="text-red-400">*</span></label>
+            <input id="f-name" type="text" placeholder="Viêm phổi cộng đồng" class="field-input"/></div>
+          <div><label class="field-label">Mã ICD-10</label>
+            <input id="f-icd" type="text" placeholder="J18.9" class="field-input"/></div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <div><label class="field-label">Chuyên khoa</label>
+            <select id="f-cat" class="field-input">
+              <option>Hô hấp</option><option>Tim mạch</option><option>Tiêu hóa</option>
+              <option>Thần kinh</option><option>Nội tiết</option><option>Nhiễm</option>
+              <option>Hồi sức</option><option>Thận - Tiết niệu</option>
+              <option>Huyết học</option><option>Cơ xương khớp</option><option>Khác</option>
+            </select></div>
+          <div><label class="field-label">Icon (emoji)</label>
+            <input id="f-icon" type="text" placeholder="🫁" maxlength="4" class="field-input"/></div>
+        </div>
+      </fieldset>
+
+      <!-- Clinical -->
+      <fieldset class="border border-gray-200 dark:border-slate-700 p-4 rounded-xl">
+        <legend class="text-sm font-semibold px-2 text-blue-600 dark:text-blue-400">Khám & Chẩn đoán</legend>
+        <div class="space-y-4">
+          <div><label class="field-label">Tổng quan</label>
+            <textarea id="f-overview" rows="2" placeholder="Nội dung tổng quan…" class="field-input resize-y"></textarea></div>
+          <div><label class="field-label">Cơ chế bệnh sinh</label>
+            <textarea id="f-patho" rows="2" placeholder="Cơ chế bệnh sinh…" class="field-input resize-y"></textarea></div>
+          <div><label class="field-label">Tiêu chuẩn chẩn đoán</label>
+            <textarea id="f-criteria" rows="2" placeholder="Các tiêu chuẩn chẩn đoán…" class="field-input resize-y"></textarea></div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div><label class="field-label">Lâm sàng</label>
+              <textarea id="f-clinical" rows="3" placeholder="Triệu chứng lâm sàng…" class="field-input resize-y"></textarea></div>
+            <div><label class="field-label">Cận lâm sàng</label>
+              <textarea id="f-paraclinical" rows="3" placeholder="Xét nghiệm, hình ảnh…" class="field-input resize-y"></textarea></div>
+          </div>
+          
+          <!-- Bảng điểm Multi-blocks -->
+          <div>
+            <div class="flex items-center justify-between mb-2 mt-2">
+              <label class="field-label mb-0 text-blue-600 dark:text-blue-400 text-sm">Thang điểm / Bảng điểm (Tùy chọn)</label>
+              <button onclick="addScoreBlock()" class="text-xs font-semibold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 transition">＋ Thêm 1 thang điểm mới</button>
+            </div>
+            <div id="scoreBlocksContainer" class="space-y-4"></div>
+          </div>
+
+        </div>
+      </fieldset>
+
+      <!-- Mindmap Editor -->
+      <fieldset class="border border-gray-200 dark:border-slate-700 p-4 rounded-xl">
+        <legend class="text-sm font-semibold px-2 text-blue-600 dark:text-blue-400">Sơ đồ Thuật toán (Mermaid)</legend>
+        
+        <!-- Hướng dẫn viết sơ đồ (Collapsible) -->
+        <details class="mb-4 group bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <summary class="cursor-pointer text-sm font-semibold text-blue-700 dark:text-blue-400 p-3 select-none flex items-center justify-between">
+            <span class="flex items-center gap-2">📖 Hướng dẫn nhanh vẽ sơ đồ thuật toán</span>
+            <span class="text-xs group-open:rotate-180 transition-transform duration-200">▼</span>
+          </summary>
+          <div class="p-3 pt-0 text-xs text-gray-700 dark:text-gray-300 space-y-2 border-t border-blue-100 dark:border-blue-800/50 mt-1">
+            <p><strong>1. Khai báo hướng:</strong> <code class="bg-white dark:bg-slate-800 px-1 rounded">flowchart TD</code> (Trên xuống) hoặc <code class="bg-white dark:bg-slate-800 px-1 rounded">flowchart LR</code> (Trái sang phải)</p>
+            <p><strong>2. Hình khối:</strong></p>
+            <ul class="list-disc list-inside pl-4 space-y-1">
+              <li>Hình chữ nhật (Bước thực hiện): <code class="bg-white dark:bg-slate-800 px-1 rounded">A[Nội dung]</code></li>
+              <li>Hình chữ nhật bo góc (Bắt đầu/Kết thúc): <code class="bg-white dark:bg-slate-800 px-1 rounded">B([Nội dung])</code></li>
+              <li>Hình thoi (Câu hỏi/Điều kiện): <code class="bg-white dark:bg-slate-800 px-1 rounded">C{Có sốt không?}</code></li>
+            </ul>
+            <p><strong>3. Mũi tên:</strong></p>
+            <ul class="list-disc list-inside pl-4 space-y-1">
+              <li>Chỉ thẳng: <code class="bg-white dark:bg-slate-800 px-1 rounded">A --> B</code></li>
+              <li>Có chữ ở giữa (TH 1): <code class="bg-white dark:bg-slate-800 px-1 rounded">A -->|Có| B</code></li>
+              <li>Có chữ ở giữa (TH 2): <code class="bg-white dark:bg-slate-800 px-1 rounded">A -- Không --> C</code></li>
+            </ul>
+            <div class="bg-white dark:bg-slate-800 p-2 rounded mt-2 font-mono text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">
+              flowchart TD<br>
+              &nbsp;&nbsp;A([BN nhập viện]) --> B{Suy hô hấp?}<br>
+              &nbsp;&nbsp;B -->|Có| C[Thở Oxy]<br>
+              &nbsp;&nbsp;B -->|Không| D[Đo Mạch, HA]
+            </div>
+          </div>
+        </details>
+
+        <div class="flex gap-2 mb-2">
+          <button onclick="insertMmTemplate('algorithm')" class="text-xs bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-slate-600">Template Thuật toán</button>
+          <button onclick="insertMmTemplate('sequence')" class="text-xs bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-slate-600">Timeline</button>
+          <button onclick="insertMmTemplate('gantt')" class="text-xs bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-slate-600">Gantt</button>
+        </div>
+        <textarea id="f-mindmap" rows="6" placeholder="flowchart TD&#10;A[Bắt đầu] --> B{Điều kiện?}&#10;B -->|Đúng| C[Kết quả 1]" class="field-input font-mono resize-y"></textarea>
+      </fieldset>
+
+      <!-- Advanced Treatment -->
+      <fieldset class="border border-gray-200 dark:border-slate-700 p-4 rounded-xl">
+        <legend class="text-sm font-semibold px-2 text-blue-600 dark:text-blue-400">Chi tiết Điều trị</legend>
+        
+        <div class="space-y-6">
+          <!-- Non-pharma -->
+          <div>
+            <label class="field-label">1. Điều trị không dùng thuốc (Dinh dưỡng, Lối sống...)</label>
+            <textarea id="f-treat-nonpharma" rows="2" placeholder="Chế độ ăn, tập luyện, tư thế..." class="field-input resize-y"></textarea>
+          </div>
+
+          <!-- Oral Drugs -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="field-label mb-0 text-emerald-600 dark:text-emerald-400">2. Thuốc Uống (Oral)</label>
+              <button onclick="addDrugRow('oral')" class="text-xs text-blue-600 dark:text-blue-300 hover:underline">＋ Thêm thuốc uống</button>
+            </div>
+            <div class="overflow-x-auto rounded-lg border border-emerald-200 dark:border-emerald-900/50">
+              <table class="min-w-full text-xs">
+                <thead class="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">
+                  <tr>
+                    <th class="px-2 py-2 text-left font-semibold w-32">Tên thuốc</th>
+                    <th class="px-2 py-2 text-left font-semibold w-28">Liều dùng</th>
+                    <th class="px-2 py-2 text-left font-semibold">Tác dụng phụ</th>
+                    <th class="px-2 py-2 text-left font-semibold">CCĐ / Thận trọng</th>
+                    <th class="px-2 py-2 text-left font-semibold">Ghi chú</th>
+                    <th class="w-6"></th>
+                  </tr>
+                </thead>
+                <tbody id="oralBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Inject Drugs -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="field-label mb-0 text-rose-600 dark:text-rose-400">3. Thuốc Tiêm / Truyền (IV/IM/SC)</label>
+              <button onclick="addDrugRow('inject')" class="text-xs text-blue-600 dark:text-blue-300 hover:underline">＋ Thêm thuốc tiêm</button>
+            </div>
+            <div class="overflow-x-auto rounded-lg border border-rose-200 dark:border-rose-900/50">
+              <table class="min-w-full text-xs">
+                <thead class="bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400">
+                  <tr>
+                    <th class="px-2 py-2 text-left font-semibold w-32">Tên thuốc</th>
+                    <th class="px-2 py-2 text-left font-semibold w-28">Liều dùng / Pha</th>
+                    <th class="px-2 py-2 text-left font-semibold">Tác dụng phụ</th>
+                    <th class="px-2 py-2 text-left font-semibold">CCĐ / Thận trọng</th>
+                    <th class="px-2 py-2 text-left font-semibold">Ghi chú / Y lệnh</th>
+                    <th class="w-6"></th>
+                  </tr>
+                </thead>
+                <tbody id="injectBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Intervention -->
+          <div>
+            <label class="field-label">4. Thủ thuật / Can thiệp / Phẫu thuật</label>
+            <textarea id="f-treat-interv" rows="2" placeholder="Đặt NKQ, Thở máy, Phẫu thuật..." class="field-input resize-y"></textarea>
+          </div>
+
+          <!-- Monitoring & Notes -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="field-label">5. Theo dõi (Monitoring)</label>
+              <textarea id="f-treat-monitor" rows="3" placeholder="Theo dõi sinh hiệu, SpO2, nước tiểu..." class="field-input resize-y"></textarea>
+            </div>
+            <div>
+              <label class="field-label">6. Lưu ý điều trị</label>
+              <textarea id="f-treat-notes" rows="3" placeholder="Các lưu ý đặc biệt, tiêu chuẩn xuất viện..." class="field-input resize-y"></textarea>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- References -->
+      <fieldset class="border border-gray-200 dark:border-slate-700 p-4 rounded-xl">
+        <legend class="text-sm font-semibold px-2 text-blue-600 dark:text-blue-400">Tài liệu tham khảo</legend>
+        <button id="btnAddRef" class="text-xs text-blue-600 dark:text-blue-300 hover:underline mb-2">＋ Thêm tài liệu</button>
+        <div id="refList" class="space-y-2"></div>
+      </fieldset>
+
+    </div>
+    <div class="p-5 border-t border-gray-100 dark:border-slate-700 flex justify-end gap-3 rounded-b-2xl bg-gray-50 dark:bg-slate-800/50">
+      <button id="btnCancelModal" class="px-4 py-2 text-sm rounded-lg border border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 transition">Hủy</button>
+      <button id="btnSave" class="px-5 py-2 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition shadow-sm">💾 Lưu phác đồ</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2">
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+// ── CATEGORY CONFIG ───────────────────────────────────────────────────────────
+const CATS = {
+  'Hô hấp':        { icon:'🫁', color:'blue',    hex:'#3b82f6', mermaid:'#bfdbfe' },
+  'Tim mạch':      { icon:'❤️',  color:'rose',    hex:'#f43f5e', mermaid:'#fecdd3' },
+  'Tiêu hóa':      { icon:'🫃', color:'amber',   hex:'#f59e0b', mermaid:'#fde68a' },
+  'Thần kinh':     { icon:'🧠', color:'purple',  hex:'#a855f7', mermaid:'#e9d5ff' },
+  'Nội tiết':      { icon:'🩸', color:'emerald', hex:'#10b981', mermaid:'#a7f3d0' },
+  'Nhiễm':         { icon:'🦠', color:'orange',  hex:'#f97316', mermaid:'#fed7aa' },
+  'Hồi sức':       { icon:'🚨', color:'red',     hex:'#ef4444', mermaid:'#fecaca' },
+  'Thận - Tiết niệu':{ icon:'🫘', color:'cyan', hex:'#06b6d4', mermaid:'#a5f3fc' },
+  'Huyết học':     { icon:'🔴', color:'rose',    hex:'#f43f5e', mermaid:'#fecdd3' },
+  'Cơ xương khớp': { icon:'🦴', color:'lime',    hex:'#84cc16', mermaid:'#d9f99d' },
+  'Khác':          { icon:'📋', color:'gray',    hex:'#6b7280', mermaid:'#e5e7eb' },
+};
+
+const GRAD = {
+  blue:'linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%)',
+  rose:'linear-gradient(135deg,#ffe4e6 0%,#fecdd3 100%)',
+  amber:'linear-gradient(135deg,#fef3c7 0%,#fde68a 100%)',
+  purple:'linear-gradient(135deg,#f3e8ff 0%,#e9d5ff 100%)',
+  emerald:'linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%)',
+  orange:'linear-gradient(135deg,#ffedd5 0%,#fed7aa 100%)',
+  red:'linear-gradient(135deg,#fee2e2 0%,#fecaca 100%)',
+  cyan:'linear-gradient(135deg,#cffafe 0%,#a5f3fc 100%)',
+  lime:'linear-gradient(135deg,#ecfccb 0%,#d9f99d 100%)',
+  gray:'linear-gradient(135deg,#f3f4f6 0%,#e5e7eb 100%)',
+};
+const GRAD_DARK = {
+  blue:'linear-gradient(135deg,#1e3a5f 0%,#1e40af 100%)',
+  rose:'linear-gradient(135deg,#4c0519 0%,#881337 100%)',
+  amber:'linear-gradient(135deg,#451a03 0%,#78350f 100%)',
+  purple:'linear-gradient(135deg,#3b0764 0%,#6b21a8 100%)',
+  emerald:'linear-gradient(135deg,#022c22 0%,#065f46 100%)',
+  orange:'linear-gradient(135deg,#431407 0%,#7c2d12 100%)',
+  red:'linear-gradient(135deg,#450a0a 0%,#7f1d1d 100%)',
+  cyan:'linear-gradient(135deg,#083344 0%,#164e63 100%)',
+  lime:'linear-gradient(135deg,#1a2e05 0%,#365314 100%)',
+  gray:'linear-gradient(135deg,#1f2937 0%,#374151 100%)',
+};
+
+const SPEC_LIST = ['Hô hấp','Tim mạch','Tiêu hóa','Thần kinh','Nội tiết','Nhiễm','Hồi sức'];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let protocols = [];
+let editingId = null;
+let currentId = null;
+let activeSpec = '';
+let dark = false;
+let mmScale = 1;
+let mmTranslate = {x:0, y:0};
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+document.getElementById('btnTheme').addEventListener('click', () => {
+  dark = !dark;
+  document.documentElement.classList.toggle('dark', dark);
+  document.getElementById('btnTheme').textContent = dark ? '☀️' : '🌙';
+  if(!document.getElementById('detailView').classList.contains('hidden')){
+    const p = protocols.find(x => x.id === currentId);
+    if(p) {
+        renderDetail(p);
+        if(!document.getElementById('tab-mindmap').classList.contains('hidden')) {
+            renderMindmap();
         }
+    }
+  }
+});
 
-        function StatPill({ icon, value, label, c }) {
-            return (
-                <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-                    <span style={{ fontSize:12 }}>{icon}</span>
-                    <span style={{ fontSize:12, fontWeight:600, color:c.text }}>{value}</span>
-                    <span style={{ fontSize:11, color:c.muted }}>{label}</span>
-                </div>
-            );
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ── COPY CLIPBOARD ────────────────────────────────────────────────────────────
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => toast('Đã copy vào clipboard!'));
+}
+
+// ── PERSIST ──────────────────────────────────────────────────────────────────
+async function persist() {
+  try { await window.storage.set('protocols_v7', JSON.stringify(protocols)); } catch(e) {}
+}
+async function loadStored() {
+  try {
+    const r = await window.storage.get('protocols_v7');
+    if (r && r.value) protocols = JSON.parse(r.value);
+  } catch(e) {}
+  if (!protocols.length) loadSamples();
+  buildSpecRow();
+  applyFilters();
+}
+
+// ── SPECIALTY ROW ─────────────────────────────────────────────────────────────
+function buildSpecRow() {
+  const row = document.getElementById('specRow');
+  row.innerHTML = '';
+
+  const all = document.createElement('button');
+  all.className = 'spec-pill active flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-2xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-xs font-semibold text-gray-600 dark:text-slate-300 snap-start';
+  all.dataset.spec = '';
+  all.innerHTML = `<span class="text-base">🏥</span> Tất cả`;
+  all.addEventListener('click', () => selectSpec(''));
+  row.appendChild(all);
+
+  SPEC_LIST.forEach(name => {
+    const cfg = CATS[name] || CATS['Khác'];
+    const btn = document.createElement('button');
+    btn.className = `spec-pill flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs font-semibold snap-start`;
+    btn.dataset.spec = name;
+    btn.innerHTML = `<span class="text-base">${cfg.icon}</span><span class="whitespace-nowrap" style="color:${cfg.hex}">${name}</span>`;
+    btn.style.background = `color-mix(in srgb, ${cfg.hex} 12%, white)`;
+    btn.style.borderColor = `color-mix(in srgb, ${cfg.hex} 25%, white)`;
+    btn.addEventListener('click', () => selectSpec(name));
+    row.appendChild(btn);
+  });
+}
+
+function selectSpec(name) {
+  activeSpec = name;
+  document.querySelectorAll('.spec-pill').forEach(b => b.classList.toggle('active', b.dataset.spec === name));
+  document.getElementById('searchInput').value = '';
+  applyFilters();
+}
+
+// ── FILTERS ───────────────────────────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('btnClearFilter').addEventListener('click', () => {
+  document.getElementById('searchInput').value = '';
+  selectSpec('');
+});
+
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const arr = protocols.filter(p => {
+    const m1 = activeSpec ? p.category === activeSpec : true;
+    const m2 = !q || p.name.toLowerCase().includes(q) || (p.icd||'').toLowerCase().includes(q) || (p.overview||'').toLowerCase().includes(q);
+    return m1 && m2;
+  });
+  renderGrid(arr);
+  document.getElementById('countLabel').textContent = arr.length + ' phác đồ';
+  document.getElementById('btnClearFilter').classList.toggle('hidden', !q && !activeSpec);
+  document.getElementById('emptyState').classList.toggle('hidden', arr.length > 0);
+}
+
+function renderGrid(arr) {
+  const grid = document.getElementById('cardGrid');
+  grid.innerHTML = '';
+  arr.forEach(p => {
+    const cfg = CATS[p.category] || CATS['Khác'];
+    const card = document.createElement('div');
+    card.className = 'card-hover bg-white dark:bg-slate-800 rounded-2xl p-5 border border-gray-100 dark:border-slate-700 cursor-pointer flex flex-col h-full';
+    card.innerHTML = `
+      <div class="flex-1">
+        <div class="flex items-start gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 shadow-sm"
+               style="background:color-mix(in srgb,${cfg.hex} 15%,white)">${p.icon}</div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-sm leading-tight truncate">${p.name}</h3>
+            <span class="text-xs font-mono" style="color:${cfg.hex}">${p.icd||'—'}</span>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-slate-400 line-clamp-2 mb-3">${p.overview||'Chưa có mô tả.'}</p>
+        <div class="flex items-center justify-between mt-auto">
+          <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full"
+            style="background:color-mix(in srgb,${cfg.hex} 12%,white);color:${cfg.hex}">${p.category}</span>
+          <span class="text-xs text-gray-400">${p.updated||''}</span>
+        </div>
+      </div>`;
+    card.addEventListener('click', () => openDetail(p.id));
+    grid.appendChild(card);
+  });
+}
+
+// ── DETAIL ────────────────────────────────────────────────────────────────────
+function openDetail(id) {
+  currentId = id;
+  const p = protocols.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('detailView').classList.remove('hidden');
+  renderDetail(p);
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.className = 'tab-btn ' + (i === 0 ? 'tab-active' : 'tab-inactive') + ' px-4 py-3 text-sm whitespace-nowrap';
+  });
+  showTab('overview');
+}
+
+function closeDetail() {
+  currentId = null;
+  document.getElementById('dashboard').classList.remove('hidden');
+  document.getElementById('detailView').classList.add('hidden');
+}
+
+function renderDetail(p) {
+  const cfg = CATS[p.category] || CATS['Khác'];
+  const isDark = document.documentElement.classList.contains('dark');
+
+  document.getElementById('detailBreadcrumb').textContent = p.name;
+  document.getElementById('detailName').textContent = p.name;
+  document.getElementById('detailName').style.color = isDark ? '#fff' : '#1e293b';
+  document.getElementById('detailICD').textContent = p.icd ? 'ICD: ' + p.icd : '';
+  document.getElementById('detailCat').textContent = p.category;
+  document.getElementById('detailDate').textContent = p.updated ? 'Cập nhật: ' + p.updated : '';
+
+  const hdr = document.getElementById('detailHeader');
+  hdr.style.background = isDark ? GRAD_DARK[cfg.color] : GRAD[cfg.color];
+  hdr.style.border = `1px solid color-mix(in srgb,${cfg.hex} 20%,transparent)`;
+  document.getElementById('detailIcon').textContent = p.icon;
+
+  document.getElementById('tab-mindmap').dataset.code = p.mindmap || '';
+  document.getElementById('tab-mindmap').dataset.color = cfg.hex;
+  document.getElementById('tab-mindmap').dataset.bgcolor = cfg.mermaid;
+
+  const sec = (e, t, content, rawText) => `<section class="mb-5 group relative">
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="font-semibold text-sm flex items-center gap-1.5">${e} ${t}</h3>
+      <button onclick="copyText('${(rawText||content||'').replace(/\n/g,'\\n').replace(/'/g,"\\'")}')" class="copy-btn text-xs text-gray-400 hover:text-blue-500 flex items-center gap-1">📋 Copy</button>
+    </div>
+    <p class="text-sm text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">${content||'<span class="text-gray-400">Chưa có nội dung.</span>'}</p>
+  </section>`;
+
+  document.getElementById('tab-overview').innerHTML = sec('📝','Tổng quan',p.overview,p.overview) + sec('🧬','Cơ chế bệnh sinh',p.patho,p.patho);
+  
+  // Tab Chẩn đoán
+  let diagHtml = sec('📌','Tiêu chuẩn chẩn đoán',p.criteria,p.criteria);
+  
+  // Mảng Thang điểm mới
+  if(p.scoreTables && p.scoreTables.length > 0) {
+    let scoreSection = `<section class="mb-5">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-semibold text-sm flex items-center gap-1.5">🔢 Thang điểm / Bảng điểm</h3>
+      </div>
+      <div class="space-y-6">`;
+      
+    p.scoreTables.forEach(tbl => {
+      let tHtml = `<div class="bg-gray-50/50 dark:bg-slate-800/30 border border-gray-100 dark:border-slate-700/60 rounded-xl p-4">`;
+      if(tbl.name) tHtml += `<h4 class="font-semibold text-sm text-blue-700 dark:text-blue-300 mb-1">${tbl.name}</h4>`;
+      if(tbl.desc) tHtml += `<p class="text-xs text-gray-600 dark:text-slate-400 mb-3 whitespace-pre-wrap">${tbl.desc}</p>`;
+      
+      if(tbl.rows && tbl.rows.length > 0) {
+        let rowsHtml = tbl.rows.map(d => `<tr class="border-t border-gray-100 dark:border-slate-700/50 text-xs hover:bg-white dark:hover:bg-slate-800 transition-colors">
+          <td class="px-3 py-2 font-medium text-gray-800 dark:text-slate-200">${d.criteria||'—'}</td>
+          <td class="px-3 py-2 text-gray-600 dark:text-slate-400">${d.details||'—'}</td>
+          <td class="px-3 py-2 text-blue-600 dark:text-blue-400 font-bold text-center">${d.points||'—'}</td>
+        </tr>`).join('');
+        
+        tHtml += `<div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm">
+          <table class="min-w-full">
+            <thead class="bg-gray-100 dark:bg-slate-700 text-xs font-semibold text-gray-600 dark:text-slate-300">
+              <tr>
+                <th class="px-3 py-2 text-left w-[30%]">Tiêu chí / Dấu hiệu</th>
+                <th class="px-3 py-2 text-left w-[50%]">Phân loại / Giá trị</th>
+                <th class="px-3 py-2 text-center w-[20%] whitespace-nowrap min-w-[80px]">Điểm</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>`;
+      }
+      tHtml += `</div>`;
+      scoreSection += tHtml;
+    });
+    
+    scoreSection += `</div></section>`;
+    diagHtml += scoreSection;
+  }
+
+  diagHtml += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-5">${sec('🩺','Lâm sàng',p.clinical,p.clinical)}${sec('🔬','Cận lâm sàng',p.paraclinical,p.paraclinical)}</div>`;
+  document.getElementById('tab-diagnosis').innerHTML = diagHtml;
+
+  // Render Treatment Tab
+  let treatHtml = '';
+  const tr = p.treatment || { nonpharma:'', oralDrugs:[], injectDrugs:[], intervention:'', monitoring:'', notes:'' };
+  
+  if(tr.nonpharma) treatHtml += sec('🍏', 'Điều trị không dùng thuốc', tr.nonpharma, tr.nonpharma);
+
+  const renderDrugTable = (drugs, type, color, hex) => {
+    if(!drugs || !drugs.length) return '';
+    let rows = drugs.map(d => `<tr class="border-t border-${color}-100 dark:border-${color}-900/50 text-xs hover:bg-${color}-50 dark:hover:bg-${color}-900/20">
+      <td class="px-3 py-2 font-medium text-${color}-700 dark:text-${color}-300" style="border-left:3px solid ${hex}">${d.name||'—'}</td>
+      <td class="px-3 py-2">${d.dose||'—'}</td>
+      <td class="px-3 py-2 text-orange-600 dark:text-orange-400">${d.sideEffect||'—'}</td>
+      <td class="px-3 py-2 text-red-600 dark:text-red-400">${d.contraindication||'—'}</td>
+      <td class="px-3 py-2 text-gray-500">${d.note||'—'}</td>
+    </tr>`).join('');
+    
+    let copyTextStr = type + " Drugs:\n" + drugs.map(d => `- ${d.name}: ${d.dose}`).join('\n');
+    
+    return `<div class="mb-5 group relative">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-semibold text-sm flex items-center gap-1.5 text-${color}-600 dark:text-${color}-400">
+          ${type === 'Oral' ? '💊 Thuốc uống' : '💉 Thuốc tiêm/truyền'}
+        </h3>
+        <button onclick="copyText('${copyTextStr.replace(/\n/g,'\\n').replace(/'/g,"\\'")}')" class="copy-btn text-xs text-gray-400 hover:text-blue-500 flex items-center gap-1">📋 Copy</button>
+      </div>
+      <div class="overflow-x-auto rounded-xl border border-${color}-200 dark:border-${color}-900/50 shadow-sm">
+        <table class="min-w-full">
+          <thead class="bg-${color}-50 dark:bg-${color}-900/20 text-xs font-semibold text-${color}-700 dark:text-${color}-400">
+            <tr><th class="px-3 py-2 text-left">Tên thuốc</th><th class="px-3 py-2 text-left">Liều dùng</th>
+            <th class="px-3 py-2 text-left">Tác dụng phụ</th><th class="px-3 py-2 text-left">Chống chỉ định</th>
+            <th class="px-3 py-2 text-left">Ghi chú</th></tr></thead><tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  };
+
+  treatHtml += renderDrugTable(tr.oralDrugs, 'Oral', 'emerald', '#10b981');
+  treatHtml += renderDrugTable(tr.injectDrugs, 'Inject', 'rose', '#f43f5e');
+
+  if(tr.intervention) treatHtml += sec('🔪', 'Thủ thuật / Can thiệp', tr.intervention, tr.intervention);
+  
+  if(tr.monitoring || tr.notes) {
+      treatHtml += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4 border-t border-gray-100 dark:border-slate-700">`;
+      if(tr.monitoring) treatHtml += sec('👁️', 'Theo dõi (Monitoring)', tr.monitoring, tr.monitoring);
+      if(tr.notes) treatHtml += sec('⚠️', 'Lưu ý điều trị', tr.notes, tr.notes);
+      treatHtml += `</div>`;
+  }
+
+  if(!treatHtml) treatHtml = '<p class="text-gray-400 text-sm">Chưa có thông tin điều trị chi tiết.</p>';
+  document.getElementById('tab-treatment').innerHTML = treatHtml;
+
+  const ritems = (p.refs||[]).map((r,i) => `<div class="flex gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-700/50">
+    <span class="text-xs font-bold text-gray-400 mt-0.5 w-5 flex-shrink-0">${i+1}.</span>
+    <div>${r.url
+      ? `<a href="${r.url}" target="_blank" class="text-sm font-medium hover:underline" style="color:${cfg.hex}">${r.title||r.url}</a>
+         ${r.title?`<p class="text-xs text-gray-400 mt-0.5 break-all">${r.url}</p>`:''}`
+      : `<span class="text-sm text-gray-700 dark:text-slate-300">${r.title}</span>`}
+    </div></div>`).join('');
+  document.getElementById('tab-refs').innerHTML = ritems || '<p class="text-gray-400 text-sm">Chưa có tài liệu tham khảo.</p>';
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+function showTab(name) {
+  ['overview','diagnosis','mindmap','treatment','refs'].forEach(t =>
+    document.getElementById('tab-'+t).classList.toggle('hidden', t !== name));
+  if (name === 'mindmap') {
+    setTimeout(() => { mmFit(); renderMindmap(); }, 50);
+  }
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab-btn').forEach(b =>
+      b.className = 'tab-btn tab-inactive px-4 py-3 text-sm whitespace-nowrap');
+    this.className = 'tab-btn tab-active px-4 py-3 text-sm whitespace-nowrap';
+    showTab(this.dataset.tab);
+  });
+});
+
+// ── MERMAID ───────────────────────────────────────────────────────────────────
+function renderMindmap() {
+  const container = document.getElementById('mindmap-content');
+  const tab = document.getElementById('tab-mindmap');
+  const code = (tab.dataset.code || '').trim();
+  
+  const hex = tab.dataset.color || '#3b82f6';
+  const bgHex = tab.dataset.bgcolor || '#bfdbfe';
+  
+  if (!code) { container.innerHTML = '<p class="text-gray-400 text-sm p-4">Chưa có sơ đồ Mermaid.</p>'; return; }
+  
+  const id = 'mm_' + Date.now();
+  container.innerHTML = `<div class="mermaid flex justify-center items-center h-full w-full" id="${id}">${code}</div>`;
+  
+  try {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: dark ? '#1e293b' : bgHex, 
+        primaryBorderColor: hex,
+        primaryTextColor: dark ? '#f1f5f9' : '#1e293b',
+        lineColor: dark ? '#64748b' : '#94a3b8',
+        background: 'transparent',
+        nodeBorder: hex,
+      }
+    });
+    mermaid.run({ nodes: [document.getElementById(id)] }).then(() => {
+      setupPanZoom(document.getElementById(id).querySelector('svg'));
+    });
+  } catch(e) {
+    container.innerHTML = `<div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 text-red-500 text-sm font-mono m-4">${e.message}</div>`;
+  }
+}
+
+let isDragging = false, startX, startY;
+function setupPanZoom(svg) {
+  if(!svg) return;
+  mmScale = 1; mmTranslate = {x:0, y:0};
+  applyMmTransform(svg);
+  
+  const container = document.getElementById('mindmap-content');
+  container.onmousedown = (e) => {
+    isDragging = true;
+    startX = e.clientX - mmTranslate.x;
+    startY = e.clientY - mmTranslate.y;
+  };
+  container.onmousemove = (e) => {
+    if(!isDragging) return;
+    mmTranslate.x = e.clientX - startX;
+    mmTranslate.y = e.clientY - startY;
+    applyMmTransform(svg);
+  };
+  container.onmouseup = () => isDragging = false;
+  container.onmouseleave = () => isDragging = false;
+  
+  container.onwheel = (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    mmZoom(delta);
+  };
+}
+
+function applyMmTransform(svg) {
+  if(svg) svg.style.transform = `translate(${mmTranslate.x}px, ${mmTranslate.y}px) scale(${mmScale})`;
+}
+
+function mmZoom(delta) {
+  const svg = document.querySelector('#mindmap-content svg');
+  if(!svg) return;
+  mmScale += delta;
+  if(mmScale < 0.2) mmScale = 0.2;
+  if(mmScale > 3) mmScale = 3;
+  applyMmTransform(svg);
+}
+
+function mmFit() {
+  mmScale = 1; mmTranslate = {x:0, y:0};
+  const svg = document.querySelector('#mindmap-content svg');
+  if(svg) applyMmTransform(svg);
+}
+
+function insertMmTemplate(type) {
+  const txt = document.getElementById('f-mindmap');
+  let tpl = '';
+  if(type === 'algorithm') {
+    tpl = `flowchart TD\n  A([Bệnh nhân khám bệnh]) --> B{Có dấu hiệu nguy hiểm?}\n  B -->|Có| C[Chuyển Hồi sức cấp cứu]\n  B -- Không --> D[Thực hiện Cận lâm sàng]\n  D --> E{Kết quả bất thường?}\n  E -->|Có| F[Nhập viện theo dõi]\n  E -->|Không| G([Cho thuốc ngoại trú])`;
+  }
+  if(type === 'sequence') {
+    tpl = `sequenceDiagram\n  participant BN as Bệnh nhân\n  participant BS as Bác sĩ\n  BN->>BS: Khám bệnh\n  BS->>BN: Cho thuốc\n  Note right of BN: Uống sau ăn`;
+  }
+  if(type === 'gantt') {
+    tpl = `gantt\n  title Lịch trình điều trị\n  dateFormat YYYY-MM-DD\n  section Kháng sinh\n  Ceftriaxone IV :a1, 2024-01-01, 7d\n  section Thuốc uống\n  Paracetamol PO :a2, 2024-01-01, 3d`;
+  }
+  txt.value = tpl;
+}
+
+// ── IMPORT FILE ──────────────────────────────────────────────────────────────
+document.getElementById('btnImport').addEventListener('click', () => {
+  document.getElementById('fileImport').click();
+});
+
+document.getElementById('fileImport').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    try {
+      const data = JSON.parse(event.target.result);
+      
+      // Khi load dữ liệu từ file thì sẽ hiển thị Modal để người dùng kiểm tra 
+      // trước khi thực sự lưu (giống như "Thêm phác đồ mới").
+      editingId = null; 
+      document.getElementById('modalTitle').textContent = 'Thêm phác đồ (Từ file)';
+      clearForm();
+      fillForm(data);
+      openModal();
+      
+      toast('Đã tải dữ liệu, vui lòng kiểm tra và Lưu');
+    } catch(err) {
+      alert('Lỗi đọc file JSON. Vui lòng kiểm tra lại định dạng file!');
+    }
+    // Xóa value để có thể import lại cùng 1 file nếu cần
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+
+// ── MODAL ────────────────────────────────────────────────────────────────────
+function openModal() { document.getElementById('modalOverlay').classList.remove('hidden'); }
+function closeModal() { document.getElementById('modalOverlay').classList.add('hidden'); }
+
+function clearForm() {
+  ['f-name','f-icd','f-icon','f-overview','f-patho','f-criteria','f-clinical','f-paraclinical','f-mindmap','f-treat-nonpharma','f-treat-interv','f-treat-monitor','f-treat-notes']
+    .forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-cat').selectedIndex = 0;
+  document.getElementById('scoreBlocksContainer').innerHTML = '';
+  document.getElementById('oralBody').innerHTML = '';
+  document.getElementById('injectBody').innerHTML = '';
+  document.getElementById('refList').innerHTML = '';
+}
+
+function fillForm(p) {
+  document.getElementById('f-name').value = p.name || '';
+  document.getElementById('f-icd').value = p.icd || '';
+  document.getElementById('f-icon').value = p.icon || '';
+  document.getElementById('f-overview').value = p.overview || '';
+  document.getElementById('f-patho').value = p.patho || '';
+  document.getElementById('f-criteria').value = p.criteria || '';
+  document.getElementById('f-clinical').value = p.clinical || '';
+  document.getElementById('f-paraclinical').value = p.paraclinical || '';
+  document.getElementById('f-mindmap').value = p.mindmap || '';
+  
+  const sel = document.getElementById('f-cat');
+  for (let i = 0; i < sel.options.length; i++) if (sel.options[i].value === p.category) sel.selectedIndex = i;
+  
+  // Render multi score blocks
+  document.getElementById('scoreBlocksContainer').innerHTML = '';
+  if(p.scoreTables && p.scoreTables.length > 0) {
+      p.scoreTables.forEach(tbl => addScoreBlock(tbl));
+  }
+
+  const tr = p.treatment || { nonpharma:'', oralDrugs:[], injectDrugs:[], intervention:'', monitoring:'', notes:'' };
+  document.getElementById('f-treat-nonpharma').value = tr.nonpharma || '';
+  document.getElementById('f-treat-interv').value = tr.intervention || '';
+  document.getElementById('f-treat-monitor').value = tr.monitoring || '';
+  document.getElementById('f-treat-notes').value = tr.notes || '';
+  
+  document.getElementById('oralBody').innerHTML = '';
+  document.getElementById('injectBody').innerHTML = '';
+  (tr.oralDrugs || []).forEach(d => addDrugRow('oral', d));
+  (tr.injectDrugs || []).forEach(d => addDrugRow('inject', d));
+
+  document.getElementById('refList').innerHTML = '';
+  (p.refs || []).forEach(r => addRefRow(r));
+}
+
+// ── MULTI SCORE BLOCKS ───────────────────────────────────────────────────────
+function addScoreBlock(data = {}) {
+  const container = document.getElementById('scoreBlocksContainer');
+  const blockId = 'sb_' + Date.now() + Math.floor(Math.random() * 100);
+  
+  const block = document.createElement('div');
+  block.className = 'score-block border border-gray-200 dark:border-slate-600 p-3 rounded-lg bg-gray-50/50 dark:bg-slate-800/30';
+  block.dataset.blockId = blockId;
+  
+  block.innerHTML = `
+    <div class="flex items-center justify-between mb-2">
+      <input type="text" placeholder="Tên thang điểm (VD: 1. Thang điểm CURB-65)..." value="${data.name||''}" class="f-sb-name field-input font-semibold text-blue-700 dark:text-blue-300 !bg-white dark:!bg-slate-900 border-none shadow-sm !py-1.5"/>
+      <button type="button" class="del-block text-red-400 hover:text-red-600 ml-2 text-xl px-1">✕</button>
+    </div>
+    <textarea rows="1" placeholder="Mô tả, đánh giá kết quả (VD: 0-1 điểm: Ngoại trú...)" class="f-sb-desc field-input resize-y mb-3 text-sm">${data.desc||''}</textarea>
+    
+    <div class="flex items-center justify-end mb-2">
+      <button type="button" onclick="addScoreRowToBlock('${blockId}')" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">＋ Thêm hàng tiêu chí</button>
+    </div>
+    <div class="overflow-x-auto rounded border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800">
+      <table class="min-w-full text-xs">
+        <thead class="bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300">
+          <tr>
+            <th class="px-2 py-2 text-left font-semibold w-[30%]">Tiêu chí / Dấu hiệu</th>
+            <th class="px-2 py-2 text-left font-semibold w-[50%]">Phân loại / Giá trị</th>
+            <th class="px-2 py-2 text-center font-semibold w-[20%]">Điểm</th>
+            <th class="w-6"></th>
+          </tr>
+        </thead>
+        <tbody class="sb-tbody"></tbody>
+      </table>
+    </div>
+  `;
+  
+  block.querySelector('.del-block').addEventListener('click', () => block.remove());
+  container.appendChild(block);
+  
+  const tbody = block.querySelector('.sb-tbody');
+  if(data.rows && data.rows.length > 0) {
+      data.rows.forEach(r => _createScoreRowEl(tbody, r));
+  } else {
+      _createScoreRowEl(tbody, {});
+  }
+}
+
+function addScoreRowToBlock(blockId) {
+    const block = document.querySelector(`[data-block-id="${blockId}"]`);
+    if(block) _createScoreRowEl(block.querySelector('.sb-tbody'), {});
+}
+
+function _createScoreRowEl(tbody, d = {}) {
+  const tr = document.createElement('tr');
+  tr.className = `border-t border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/50`;
+  const fields = ['criteria','details','points'];
+  tr.innerHTML = fields.map(f =>
+    `<td class="px-2 py-1.5"><div contenteditable="true" data-f="${f}"
+      class="text-xs text-gray-700 dark:text-slate-300 min-h-[18px] outline-none focus:bg-gray-100 dark:focus:bg-slate-700 p-1 rounded">${d[f]||''}</div></td>`
+  ).join('') +
+  `<td class="px-1 text-center"><button type="button" class="del-srow text-red-400 hover:text-red-600 text-base leading-none font-bold">×</button></td>`;
+  
+  tr.querySelector('.del-srow').addEventListener('click', () => tr.remove());
+  tbody.appendChild(tr);
+}
+
+function getScoreTables() {
+  return Array.from(document.querySelectorAll('.score-block')).map(block => {
+      const name = block.querySelector('.f-sb-name').value.trim();
+      const desc = block.querySelector('.f-sb-desc').value.trim();
+      const rows = Array.from(block.querySelectorAll('.sb-tbody tr')).map(tr => {
+          const obj = {};
+          tr.querySelectorAll('[data-f]').forEach(el => obj[el.dataset.f] = el.textContent.trim());
+          return obj;
+      }).filter(d => d.criteria || d.details || d.points);
+      
+      return { name, desc, rows };
+  }).filter(t => t.name || t.desc || t.rows.length > 0);
+}
+
+// ── DRUG ROW ─────────────────────────────────────────────────────────────────
+function addDrugRow(type, d = {}) {
+  const tr = document.createElement('tr');
+  const isOral = type === 'oral';
+  const color = isOral ? 'emerald' : 'rose';
+  tr.className = `border-t border-${color}-100 dark:border-${color}-900/50 bg-white dark:bg-slate-800`;
+  
+  const fields = ['name','dose','sideEffect','contraindication','note'];
+  tr.innerHTML = fields.map(f =>
+    `<td class="px-2 py-1.5"><div contenteditable="true" data-f="${f}"
+      class="text-xs text-gray-700 dark:text-slate-300 min-h-[18px] outline-none focus:bg-${color}-50 dark:focus:bg-${color}-900/30 p-1 rounded">${d[f]||''}</div></td>`
+  ).join('') +
+  `<td class="px-1 text-center"><button class="del-drug text-red-400 hover:text-red-600 text-base leading-none font-bold">×</button></td>`;
+  
+  tr.querySelector('.del-drug').addEventListener('click', () => tr.remove());
+  document.getElementById(isOral ? 'oralBody' : 'injectBody').appendChild(tr);
+}
+
+function getDrugs(tbodyId) {
+  return Array.from(document.querySelectorAll(`#${tbodyId} tr`)).map(tr => {
+    const obj = {};
+    tr.querySelectorAll('[data-f]').forEach(el => obj[el.dataset.f] = el.textContent.trim());
+    return obj;
+  }).filter(d => d.name);
+}
+
+// ── REF ROW ──────────────────────────────────────────────────────────────────
+function addRefRow(r = {}) {
+  const div = document.createElement('div');
+  div.className = 'flex gap-2 items-start';
+  div.innerHTML = `
+    <div class="flex-1 space-y-1">
+      <input type="text" placeholder="Tên tài liệu..." value="${r.title||''}" class="f-ref-title field-input py-1 text-xs"/>
+      <input type="text" placeholder="URL (nếu có)..." value="${r.url||''}" class="f-ref-url field-input py-1 text-xs text-blue-600 dark:text-blue-400"/>
+    </div>
+    <button class="del-ref text-red-400 hover:text-red-600 text-lg leading-none p-1">×</button>`;
+  div.querySelector('.del-ref').addEventListener('click', () => div.remove());
+  document.getElementById('refList').appendChild(div);
+}
+
+function getRefs() {
+  return Array.from(document.querySelectorAll('#refList > div')).map(div => ({
+    title: div.querySelector('.f-ref-title').value.trim(),
+    url: div.querySelector('.f-ref-url').value.trim()
+  })).filter(r => r.title || r.url);
+}
+
+// ── EVENTS ────────────────────────────────────────────────────────────────────
+document.getElementById('btnBack').addEventListener('click', closeDetail);
+document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+document.getElementById('btnCancelModal').addEventListener('click', closeModal);
+
+document.getElementById('btnAdd').addEventListener('click', () => {
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'Thêm phác đồ mới';
+  clearForm();
+  addScoreBlock();
+  openModal();
+});
+
+document.getElementById('btnEdit').addEventListener('click', () => {
+  if (!currentId) return;
+  const p = protocols.find(x => x.id === currentId);
+  if (!p) return;
+  editingId = currentId;
+  document.getElementById('modalTitle').textContent = 'Chỉnh sửa phác đồ';
+  fillForm(p);
+  openModal();
+});
+
+document.getElementById('btnDelete').addEventListener('click', () => {
+  if (!currentId || !confirm('Bạn có chắc chắn muốn xóa phác đồ này?')) return;
+  protocols = protocols.filter(x => x.id !== currentId);
+  persist();
+  closeDetail();
+  applyFilters();
+  toast('Đã xóa phác đồ');
+});
+
+document.getElementById('btnAddRef').addEventListener('click', () => addRefRow());
+
+document.getElementById('btnSave').addEventListener('click', () => {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) return alert('Vui lòng nhập tên bệnh');
+
+  const p = {
+    id: editingId || 'p_' + Date.now(),
+    name,
+    icd: document.getElementById('f-icd').value.trim(),
+    icon: document.getElementById('f-icon').value.trim() || '📝',
+    category: document.getElementById('f-cat').value,
+    overview: document.getElementById('f-overview').value.trim(),
+    patho: document.getElementById('f-patho').value.trim(),
+    criteria: document.getElementById('f-criteria').value.trim(),
+    scoreTables: getScoreTables(),
+    clinical: document.getElementById('f-clinical').value.trim(),
+    paraclinical: document.getElementById('f-paraclinical').value.trim(),
+    mindmap: document.getElementById('f-mindmap').value.trim(),
+    treatment: {
+      nonpharma: document.getElementById('f-treat-nonpharma').value.trim(),
+      oralDrugs: getDrugs('oralBody'),
+      injectDrugs: getDrugs('injectBody'),
+      intervention: document.getElementById('f-treat-interv').value.trim(),
+      monitoring: document.getElementById('f-treat-monitor').value.trim(),
+      notes: document.getElementById('f-treat-notes').value.trim()
+    },
+    refs: getRefs(),
+    updated: new Date().toLocaleDateString('vi-VN')
+  };
+
+  if (editingId) {
+    const idx = protocols.findIndex(x => x.id === editingId);
+    if (idx >= 0) protocols[idx] = p;
+  } else {
+    protocols.unshift(p);
+  }
+
+  persist();
+  closeModal();
+  applyFilters();
+  toast('Đã lưu phác đồ thành công');
+  if (currentId === p.id) renderDetail(p);
+});
+
+// ── SAMPLE DATA ───────────────────────────────────────────────────────────────
+function loadSamples() {
+  protocols = [
+    {
+      id:'s1', name:'Viêm phổi cộng đồng (CAP)', icd:'J18.9', icon:'🫁', category:'Hô hấp',
+      overview:'Viêm phổi cộng đồng là tình trạng nhiễm trùng nhu mô phổi xảy ra ở ngoài bệnh viện.',
+      patho:'Vi khuẩn/Virus xâm nhập qua đường hô hấp → vượt qua hàng rào bảo vệ → sinh sôi tại phế nang → đáp ứng viêm → xuất tiết dịch viêm → đông đặc nhu mô.',
+      criteria:'1. Triệu chứng hô hấp cấp tính (ho, khạc đàm, đau ngực...)\n2. Triệu chứng toàn thân (sốt...)\n3. XQ ngực: tổn thương đông đặc mới',
+      scoreTables: [
+        {
+          name: "1. Thang điểm CURB-65",
+          desc: "Đánh giá độ nặng và nơi điều trị:\n• 0-1 điểm: Điều trị ngoại trú\n• 2 điểm: Nhập viện điều trị\n• 3-5 điểm: Nhập ICU",
+          rows: [
+            {criteria: 'C (Confusion)', details: 'Rối loạn tri giác', points: '1'},
+            {criteria: 'U (Urea)', details: 'BUN > 19 mg/dL (> 7 mmol/L)', points: '1'},
+            {criteria: 'R (Respiratory rate)', details: 'Nhịp thở ≥ 30 lần/phút', points: '1'},
+            {criteria: 'B (Blood pressure)', details: 'HA tâm thu < 90 mmHg hoặc tâm trương ≤ 60 mmHg', points: '1'},
+            {criteria: '65', details: 'Tuổi ≥ 65', points: '1'},
+          ]
         }
+      ],
+      clinical:'• Ho khạc đàm đục/mủ\n• Sốt cao, lạnh run\n• Đau ngực kiểu màng phổi\n• Thở nhanh, ran nổ',
+      paraclinical:'• XQ ngực thẳng: đám mờ phế nang\n• CTM: BC tăng, CRP/PCT tăng\n• Cấy đờm/máu (trước kháng sinh)',
+      mindmap:`flowchart TD\n  A([Khám lâm sàng & XQ ngực]) --> B{Chẩn đoán CAP?}\n  B -- Không --> C([Tìm nguyên nhân khác])\n  B -- Có --> D[Đánh giá CURB-65 / PSI]\n  D --> E{CURB-65}\n  E -->|0-1 điểm| F[Điều trị ngoại trú]\n  E -->|2 điểm| G[Nhập viện Nội khoa]\n  E -->|3-5 điểm| H[Nhập ICU]\n  F --> I([Amoxicillin / Macrolide])\n  G --> J([Beta-lactam IV + Macrolide])\n  H --> K([Beta-lactam IV + FQ / Macrolide IV])`,
+      treatment: {
+        nonpharma: '• Nghỉ ngơi tại giường, uống nhiều nước\n• Thở oxy nếu SpO2 < 92%\n• Vỗ rung long đờm nếu cần',
+        oralDrugs: [
+          {name:'Amoxicillin',dose:'1g × 3/ngày',sideEffect:'Tiêu chảy',contraindication:'Dị ứng Penicillin',note:'Ngoại trú nhẹ'},
+          {name:'Azithromycin',dose:'500mg/ngày × 5 ngày',sideEffect:'Rối loạn tiêu hóa',contraindication:'QTc dài',note:'Nghi Atypical'}
+        ],
+        injectDrugs: [
+          {name:'Ceftriaxone',dose:'2g/ngày IV',sideEffect:'Dị ứng',contraindication:'Dị ứng Cephalosporin',note:'Nhập viện trung bình/nặng'},
+          {name:'Levofloxacin',dose:'750mg/ngày IV',sideEffect:'Đứt gân, QTc',contraindication:'Động kinh',note:'Dị ứng Penicillin / Nặng'}
+        ],
+        intervention: '• Đặt nội khí quản thở máy nếu suy hô hấp cấp nặng\n• Dẫn lưu màng phổi nếu có tràn dịch MP lượng nhiều/mủ',
+        monitoring: '• Sinh hiệu: Mạch, HA, Nhịp thở, Nhiệt độ mỗi 4-6h\n• Theo dõi SpO2 liên tục nếu suy hô hấp\n• Lượng nước tiểu 24h\n• Đánh giá lại lâm sàng và CRP/PCT sau 48-72h',
+        notes: '• Kháng sinh cần được cho sớm nhất có thể, lý tưởng trong vòng 4h sau khi nhập viện.\n• Chuyển từ đường tiêm sang đường uống khi lâm sàng ổn định, hết sốt >24h và đường tiêu hóa bình thường.'
+      },
+      refs:[{title:'IDSA/ATS CAP Guidelines 2007',url:'https://doi.org/10.1086/511159'}],
+      updated: new Date().toLocaleDateString('vi-VN')
+    }
+  ];
+}
 
-        /* ─── GUIDELINE CARD ─── */
-        function GuidelineCard({ g, c, onSelect, onCompare, compareList }) {
-            const inCompare = compareList.includes(g.id);
-            return (
-                <div onClick={() => onSelect(g)} style={{ background:c.card, border:`1px solid ${c.border}`, borderRadius:12, padding:16, cursor:"pointer", transition:"border-color 0.2s", borderTop:`3px solid ${g.color}`, position:"relative" }}
-                    onMouseEnter={e=>e.currentTarget.style.borderColor=g.color}
-                    onMouseLeave={e=>e.currentTarget.style.borderColor=c.border}>
-                    <div style={{ position:"absolute", top:12, right:12 }}>
-                        <Badge color={PCOLORS[g.priority]} sm>{PRIORITIES[g.priority]}</Badge>
-                    </div>
-                    <div style={{ display:"flex", alignItems:"flex-start", gap:10, marginBottom:10, paddingRight:70 }}>
-                        <div style={{ fontSize:28, lineHeight:1 }}>{g.icon}</div>
-                        <div>
-                            <div style={{ fontWeight:700, color:c.text, fontSize:14 }}>{g.title}</div>
-                            <div style={{ color:c.muted, fontSize:11 }}>{g.subtitle} • {g.icd}</div>
-                        </div>
-                    </div>
-                    <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:10 }}>
-                        <Badge color={g.color} sm>{g.dept}</Badge>
-                        <Badge color={c.muted} sm>v{g.version}</Badge>
-                        <Badge color={c.muted} sm>📚 {g.refs} tài liệu</Badge>
-                    </div>
-                    <div style={{ display:"flex", gap:4, flexWrap:"wrap", marginBottom:10 }}>
-                        {g.tags.slice(0,4).map(t=>(
-                            <span key={t} style={{ fontSize:10, color:c.muted, background:c.surface, border:`0.5px solid ${c.border}`, borderRadius:4, padding:"1px 6px" }}>{t}</span>
-                        ))}
-                    </div>
-                    <div style={{ fontSize:11, color:c.muted, marginBottom:10 }}>
-                        💊 {g.drugs.join(" • ")}
-                    </div>
-                    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                        <div style={{ display:"flex", gap:10 }}>
-                            <StatPill icon="👁️" value={g.views.toLocaleString()} label="lượt xem" c={c}/>
-                            <StatPill icon="🔖" value={g.saves} label="lưu" c={c}/>
-                        </div>
-                        <button onClick={e=>{e.stopPropagation();onCompare(g.id);}}
-                            style={{ padding:"4px 10px", background: inCompare ? g.color+"22" : c.surface, border:`1px solid ${inCompare?g.color:c.border}`, borderRadius:6, color: inCompare ? g.color : c.muted, fontSize:11, fontWeight:600, cursor:"pointer" }}>
-                            {inCompare ? "✓ So sánh" : "+ So sánh"}
-                        </button>
-                    </div>
-                </div>
-            );
-        }
-
-        /* ─── DETAIL PANEL ─── */
-        function DetailPanel({ g, all, c, onClose, onSelect }) {
-            const related = all.filter(x => g.relatedIds.includes(x.id));
-            const [tab, setTab] = useState("overview");
-            const tabs = [{ id:"overview", label:"Tổng quan" }, { id:"sections", label:"Mục lục" }, { id:"drugs", label:"Thuốc" }, { id:"related", label:`Liên quan (${related.length})` }];
-            return (
-                <div style={{ position:"fixed", inset:0, background:"#000b", zIndex:200, display:"flex", alignItems:"stretch", justifyContent:"flex-end" }}>
-                    <div style={{ width:"min(520px,100vw)", background:c.card, borderLeft:`1px solid ${c.border}`, display:"flex", flexDirection:"column", overflowY:"auto" }}>
-                        <div style={{ padding:"16px 20px", borderBottom:`1px solid ${c.border}`, borderTop:`4px solid ${g.color}`, position:"sticky", top:0, background:c.card, zIndex:10 }}>
-                            <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between" }}>
-                                <div style={{ display:"flex", gap:10 }}>
-                                    <span style={{ fontSize:32 }}>{g.icon}</span>
-                                    <div>
-                                        <div style={{ fontWeight:700, color:c.text, fontSize:16 }}>{g.title}</div>
-                                        <div style={{ color:c.muted, fontSize:12 }}>{g.subtitle} • {g.icd}</div>
-                                    </div>
-                                </div>
-                                <button onClick={onClose} style={{ background:"none", border:"none", color:c.muted, fontSize:20, cursor:"pointer", lineHeight:1 }}>✕</button>
-                            </div>
-                            <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginTop:10 }}>
-                                <Badge color={g.color}>{g.dept}</Badge>
-                                <Badge color={PCOLORS[g.priority]}>{PRIORITIES[g.priority]}</Badge>
-                                <Badge color={c.muted}>v{g.version}</Badge>
-                                <Badge color={c.muted}>Cập nhật: {g.updated}</Badge>
-                            </div>
-                        </div>
-                        <div style={{ display:"flex", borderBottom:`1px solid ${c.border}`, padding:"0 20px" }}>
-                            {tabs.map(t=>(
-                                <button key={t.id} onClick={()=>setTab(t.id)} style={{ padding:"10px 14px", background:"none", border:"none", borderBottom:`2px solid ${tab===t.id?g.color:"transparent"}`, color: tab===t.id ? g.color : c.muted, fontWeight: tab===t.id?700:400, fontSize:13, cursor:"pointer" }}>
-                                    {t.label}
-                                </button>
-                            ))}
-                        </div>
-                        <div style={{ padding:20, flex:1 }}>
-                            {tab==="overview" && (
-                                <div>
-                                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:16 }}>
-                                        {[{label:"Lượt xem",val:g.views.toLocaleString(),icon:"👁️"},{label:"Đã lưu",val:g.saves,icon:"🔖"},{label:"Tài liệu TK",val:g.refs,icon:"📚"}].map(s=>(
-                                            <div key={s.label} style={{ background:c.surface, borderRadius:8, padding:"10px 12px", textAlign:"center" }}>
-                                                <div style={{ fontSize:20 }}>{s.icon}</div>
-                                                <div style={{ fontWeight:700, color:c.text, fontSize:18 }}>{s.val}</div>
-                                                <div style={{ color:c.muted, fontSize:11 }}>{s.label}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div style={{ marginBottom:14 }}>
-                                        <div style={{ fontWeight:600, color:c.text, fontSize:13, marginBottom:8 }}>Tác giả biên soạn</div>
-                                        {g.authors.map(a=>(
-                                            <div key={a} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
-                                                <div style={{ width:32, height:32, borderRadius:"50%", background:g.color+"22", border:`1px solid ${g.color}44`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:700, color:g.color }}>
-                                                    {a.split(".").pop().trim()[0]}
-                                                </div>
-                                                <span style={{ color:c.text, fontSize:13 }}>{a}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div style={{ marginBottom:14 }}>
-                                        <div style={{ fontWeight:600, color:c.text, fontSize:13, marginBottom:8 }}>Từ khoá</div>
-                                        <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
-                                            {g.tags.map(t=>(
-                                                <span key={t} style={{ background:g.color+"15", color:g.color, border:`1px solid ${g.color}33`, borderRadius:5, padding:"2px 8px", fontSize:12 }}>{t}</span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <button style={{ width:"100%", padding:"12px 0", background:g.color, color:"#fff", border:"none", borderRadius:8, fontWeight:700, cursor:"pointer", fontSize:14 }}>
-                                        📖 Mở phác đồ đầy đủ
-                                    </button>
-                                </div>
-                            )}
-                            {tab==="sections" && (
-                                <div>
-                                    <div style={{ color:c.muted, fontSize:12, marginBottom:12 }}>Danh sách mục trong phác đồ này</div>
-                                    {g.sections.map((s,i)=>(
-                                        <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 12px", background:c.surface, borderRadius:7, marginBottom:6, border:`0.5px solid ${c.border}` }}>
-                                            <div style={{ width:24, height:24, borderRadius:6, background:g.color+"22", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, color:g.color }}>{i+1}</div>
-                                            <span style={{ color:c.text, fontSize:13 }}>{s}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                            {tab==="drugs" && (
-                                <div>
-                                    <div style={{ color:c.muted, fontSize:12, marginBottom:12 }}>Thuốc được sử dụng trong phác đồ</div>
-                                    {g.drugs.map((d,i)=>(
-                                        <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", background:c.surface, borderRadius:7, marginBottom:6, border:`0.5px solid ${c.border}` }}>
-                                            <span style={{ fontSize:18 }}>💊</span>
-                                            <span style={{ color:c.text, fontSize:13, fontWeight:500 }}>{d}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                            {tab==="related" && (
-                                <div>
-                                    <div style={{ color:c.muted, fontSize:12, marginBottom:12 }}>Phác đồ liên quan — thường dùng phối hợp hoặc trong cùng bối cảnh lâm sàng</div>
-                                    {related.map(r=>(
-                                        <div key={r.id} onClick={()=>onSelect(r)} style={{ padding:"12px 14px", background:c.surface, borderRadius:8, marginBottom:8, border:`1px solid ${c.border}`, cursor:"pointer", borderLeft:`4px solid ${r.color}` }}
-                                            onMouseEnter={e=>e.currentTarget.style.borderColor=r.color}
-                                            onMouseLeave={e=>e.currentTarget.style.borderColor=c.border}>
-                                            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
-                                                <span style={{ fontSize:18 }}>{r.icon}</span>
-                                                <span style={{ fontWeight:600, color:c.text, fontSize:13 }}>{r.title}</span>
-                                                <Badge color={PCOLORS[r.priority]} sm>{PRIORITIES[r.priority]}</Badge>
-                                            </div>
-                                            <div style={{ color:c.muted, fontSize:11 }}>{r.dept} • v{r.version} • 💊 {r.drugs.slice(0,2).join(", ")}...</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        /* ─── COMPARE VIEW ─── */
-        function CompareView({ ids, all, c, onClose }) {
-            const gs = all.filter(g => ids.includes(g.id));
-            if (gs.length < 2) return null;
-            const fields = [
-                { label:"Khoa", render: g=><span style={{color:c.text,fontSize:12}}>{g.dept}</span> },
-                { label:"Mức độ", render: g=><Badge color={PCOLORS[g.priority]} sm>{PRIORITIES[g.priority]}</Badge> },
-                { label:"Phiên bản", render: g=><span style={{color:c.text,fontSize:12}}>v{g.version}</span> },
-                { label:"Cập nhật", render: g=><span style={{color:c.muted,fontSize:12}}>{g.updated}</span> },
-                { label:"Số mục", render: g=><span style={{color:c.text,fontSize:12}}>{g.sections.length} mục</span> },
-                { label:"Thuốc", render: g=><div style={{display:"flex",flexDirection:"column",gap:3}}>{g.drugs.map(d=><span key={d} style={{fontSize:11,color:c.muted}}>• {d}</span>)}</div> },
-                { label:"Tài liệu TK", render: g=><span style={{color:c.text,fontSize:12}}>{g.refs} tài liệu</span> },
-                { label:"Lượt xem", render: g=><span style={{fontWeight:600,color:c.text,fontSize:12}}>{g.views.toLocaleString()}</span> },
-            ];
-            return (
-                <div style={{ position:"fixed", inset:0, background:"#000c", zIndex:200, display:"flex", alignItems:"center", justifyContent:"center", padding:16 }}>
-                    <div style={{ background:c.card, borderRadius:14, border:`1px solid ${c.border}`, width:"min(820px,100vw)", maxHeight:"90vh", overflowY:"auto" }}>
-                        <div style={{ padding:"16px 20px", borderBottom:`1px solid ${c.border}`, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                            <span style={{ fontWeight:700, color:c.text, fontSize:15 }}>⚖️ So sánh phác đồ ({gs.length})</span>
-                            <button onClick={onClose} style={{ background:"none", border:"none", color:c.muted, fontSize:18, cursor:"pointer" }}>✕</button>
-                        </div>
-                        <div style={{ overflowX:"auto" }}>
-                            <table style={{ width:"100%", borderCollapse:"collapse", minWidth:500 }}>
-                                <thead>
-                                    <tr style={{ borderBottom:`1px solid ${c.border}` }}>
-                                        <th style={{ padding:"12px 16px", textAlign:"left", color:c.muted, fontSize:12, fontWeight:600, width:120 }}>Tiêu chí</th>
-                                        {gs.map(g=>(
-                                            <th key={g.id} style={{ padding:"12px 16px", textAlign:"left", borderBottom:`3px solid ${g.color}` }}>
-                                                <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                                                    <span>{g.icon}</span>
-                                                    <span style={{ color:c.text, fontWeight:700, fontSize:13 }}>{g.title}</span>
-                                                </div>
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {fields.map((f,i)=>(
-                                        <tr key={i} style={{ borderBottom:`0.5px solid ${c.border}`, background: i%2===0 ? "transparent" : c.surface+"88" }}>
-                                            <td style={{ padding:"10px 16px", color:c.muted, fontSize:12, fontWeight:600 }}>{f.label}</td>
-                                            {gs.map(g=>(
-                                                <td key={g.id} style={{ padding:"10px 16px", verticalAlign:"top" }}>{f.render(g)}</td>
-                                            ))}
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        /* ─── DRUG SEARCH ─── */
-        function DrugIndex({ all, c, onSelectGuideline }) {
-            const[q,setQ]=useState("");
-            const drugMap = useMemo(()=>{
-                const map={};
-                all.forEach(g=>g.drugs.forEach(d=>{if(!map[d])map[d]=[];map[d].push(g);}));
-                return map;
-            },[all]);
-            const filtered=Object.entries(drugMap).filter(([d])=>d.toLowerCase().includes(q.toLowerCase()));
-            return(
-                <div>
-                    <input value={q} onChange={e=>setQ(e.target.value)} placeholder="🔍 Tìm theo tên thuốc..."
-                        style={{width:"100%",padding:"10px 14px",background:c.input,border:`1px solid ${c.border}`,borderRadius:8,color:c.text,fontSize:14,boxSizing:"border-box",marginBottom:14}}/>
-                    {filtered.map(([drug,gs])=>(
-                        <div key={drug} style={{marginBottom:10,padding:"10px 14px",background:c.card,border:`0.5px solid ${c.border}`,borderRadius:8}}>
-                            <div style={{fontWeight:700,color:c.text,fontSize:13,marginBottom:6}}>💊 {drug}</div>
-                            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                                {gs.map(g=>(
-                                    <button key={g.id} onClick={()=>onSelectGuideline(g)} style={{padding:"4px 10px",background:g.color+"18",border:`1px solid ${g.color}44`,borderRadius:6,color:g.color,fontSize:12,fontWeight:600,cursor:"pointer"}}>
-                                        {g.icon} {g.title}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            );
-        }
-
-        /* ─── MAIN HUB ─── */
-        function GuidelineHub() {
-            const [dark, setDark] = useState(true);
-            const c = T[dark?"dark":"light"];
-            const [search, setSearch] = useState("");
-            const [dept, setDept] = useState("Tất cả");
-            const [priority, setPriority] = useState("all");
-            const [selected, setSelected] = useState(null);
-            const [compareList, setCompareList] = useState([]);
-            const [showCompare, setShowCompare] = useState(false);
-            const [view, setView] = useState("grid"); // grid | list | drugs
-            const [sortBy, setSortBy] = useState("views");
-
-            const toggleCompare = (id) => {
-                setCompareList(prev => prev.includes(id) ? prev.filter(x=>x!==id) : prev.length < 4 ? [...prev,id] : prev);
-            };
-
-            const filtered = useMemo(() => {
-                return GUIDELINES
-                    .filter(g => {
-                        const q = search.toLowerCase();
-                        const matchQ = !q || g.title.toLowerCase().includes(q) || g.subtitle.toLowerCase().includes(q) || g.tags.some(t=>t.toLowerCase().includes(q)) || g.drugs.some(d=>d.toLowerCase().includes(q)) || g.icd.toLowerCase().includes(q);
-                        const matchDept = dept === "Tất cả" || g.dept === dept;
-                        const matchP = priority === "all" || g.priority === priority;
-                        return matchQ && matchDept && matchP;
-                    })
-                    .sort((a,b) => sortBy==="views" ? b.views-a.views : sortBy==="updated" ? b.updated.localeCompare(a.updated) : a.title.localeCompare(b.title));
-            }, [search, dept, priority, sortBy]);
-
-            const stats = {
-                total: GUIDELINES.length,
-                emergency: GUIDELINES.filter(g=>g.priority==="emergency").length,
-                depts: new Set(GUIDELINES.map(g=>g.dept)).size,
-                drugs: new Set(GUIDELINES.flatMap(g=>g.drugs)).size,
-            };
-
-            return (
-                <div style={{ minHeight:"100vh", background:c.bg, color:c.text, fontFamily:"system-ui,sans-serif", fontSize:14 }}>
-                    {selected && <DetailPanel g={selected} all={GUIDELINES} c={c} onClose={()=>setSelected(null)} onSelect={g=>{setSelected(g);}} />}
-                    {showCompare && compareList.length >= 2 && <CompareView ids={compareList} all={GUIDELINES} c={c} onClose={()=>setShowCompare(false)} />}
-
-                    {/* Top Nav */}
-                    <div style={{ background:c.card, borderBottom:`1px solid ${c.border}`, padding:"0 20px", position:"sticky", top:0, zIndex:100 }}>
-                        <div style={{ maxWidth:1100, margin:"0 auto", display:"flex", alignItems:"center", gap:12, height:52 }}>
-                            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                                <span style={{ fontSize:22 }}>🏥</span>
-                                <span style={{ fontWeight:800, color:c.accent, fontSize:16, letterSpacing:-0.5 }}>ClinicalGuide</span>
-                                <span style={{ color:c.border }}>|</span>
-                                <span style={{ color:c.muted, fontSize:12 }}>Hệ thống Phác đồ Y tế</span>
-                            </div>
-                            <div style={{ flex:1 }}/>
-                            {[{id:"grid",icon:"⊞"},{id:"list",icon:"☰"},{id:"drugs",icon:"💊"}].map(v=>(
-                                <button key={v.id} onClick={()=>setView(v.id)} style={{ padding:"5px 10px", background: view===v.id ? c.accent+"22" : "transparent", border:`1px solid ${view===v.id?c.accent:c.border}`, borderRadius:6, color: view===v.id ? c.accent : c.muted, cursor:"pointer", fontSize:14, marginLeft:4 }}>
-                                    {v.icon}
-                                </button>
-                            ))}
-                            {compareList.length > 0 && (
-                                <button onClick={()=>setShowCompare(true)} style={{ padding:"6px 14px", background:c.accent, color:"#fff", border:"none", borderRadius:7, fontWeight:700, cursor:"pointer", fontSize:12, marginLeft:8 }}>
-                                    ⚖️ So sánh ({compareList.length})
-                                </button>
-                            )}
-                            <button onClick={()=>setDark(!dark)} style={{ background:c.surface, border:`1px solid ${c.border}`, color:c.text, borderRadius:6, padding:"5px 10px", cursor:"pointer", fontSize:12, marginLeft:8 }}>
-                                {dark?"☀️":"🌙"}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div style={{ maxWidth:1100, margin:"0 auto", padding:"20px 16px" }}>
-                        {/* Stats Row */}
-                        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:10, marginBottom:20 }}>
-                            {[
-                                {label:"Tổng phác đồ", val:stats.total, icon:"📋", color:c.accent},
-                                {label:"Cấp cứu khẩn", val:stats.emergency, icon:"🚨", color:c.danger},
-                                {label:"Chuyên khoa", val:stats.depts, icon:"🏥", color:c.success},
-                                {label:"Loại thuốc", val:stats.drugs, icon:"💊", color:c.purple},
-                            ].map(s=>(
-                                <div key={s.label} style={{ background:c.card, border:`1px solid ${c.border}`, borderRadius:10, padding:"12px 14px", borderTop:`3px solid ${s.color}` }}>
-                                    <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:4 }}>
-                                        <span style={{ fontSize:16 }}>{s.icon}</span>
-                                        <span style={{ color:c.muted, fontSize:11 }}>{s.label}</span>
-                                    </div>
-                                    <div style={{ fontWeight:800, color:c.text, fontSize:26 }}>{s.val}</div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Search & Filter */}
-                        <div style={{ background:c.card, border:`1px solid ${c.border}`, borderRadius:10, padding:"14px 16px", marginBottom:16 }}>
-                            <input value={search} onChange={e=>setSearch(e.target.value)}
-                                placeholder="🔍 Tìm kiếm phác đồ, thuốc, từ khoá, mã ICD..."
-                                style={{ width:"100%", padding:"10px 14px", background:c.input, border:`1px solid ${c.border}`, borderRadius:8, color:c.text, fontSize:14, boxSizing:"border-box", marginBottom:12 }}/>
-                            <div style={{ display:"flex", gap:8, flexWrap:"wrap", alignItems:"center" }}>
-                                <span style={{ color:c.muted, fontSize:12 }}>Chuyên khoa:</span>
-                                {DEPTS.map(d=>(
-                                    <button key={d} onClick={()=>setDept(d)} style={{ padding:"4px 10px", background: dept===d ? c.accent+"22" : c.surface, border:`1px solid ${dept===d?c.accent:c.border}`, borderRadius:6, color: dept===d ? c.accent : c.muted, fontSize:12, cursor:"pointer", fontWeight: dept===d?600:400 }}>
-                                        {d}
-                                    </button>
-                                ))}
-                                <div style={{ flex:1 }}/>
-                                <span style={{ color:c.muted, fontSize:12 }}>Mức độ:</span>
-                                {[{id:"all",label:"Tất cả"},{id:"emergency",label:"Khẩn"},{id:"urgent",label:"Ưu tiên"},{id:"routine",label:"Thường"}].map(p=>(
-                                    <button key={p.id} onClick={()=>setPriority(p.id)} style={{ padding:"4px 10px", background: priority===p.id ? (PCOLORS[p.id]||c.accent)+"22" : c.surface, border:`1px solid ${priority===p.id?(PCOLORS[p.id]||c.accent):c.border}`, borderRadius:6, color: priority===p.id ? (PCOLORS[p.id]||c.accent) : c.muted, fontSize:12, cursor:"pointer", fontWeight: priority===p.id?600:400 }}>
-                                        {p.label}
-                                    </button>
-                                ))}
-                                <span style={{ color:c.muted, fontSize:12, marginLeft:8 }}>Sắp xếp:</span>
-                                <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{ padding:"4px 8px", background:c.input, border:`1px solid ${c.border}`, borderRadius:6, color:c.text, fontSize:12, cursor:"pointer" }}>
-                                    <option value="views">Lượt xem</option>
-                                    <option value="updated">Mới nhất</option>
-                                    <option value="title">Tên A-Z</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* Result count */}
-                        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12 }}>
-                            <span style={{ color:c.muted, fontSize:12 }}>Hiển thị <b style={{color:c.text}}>{filtered.length}</b> / {GUIDELINES.length} phác đồ</span>
-                        </div>
-
-                        {/* Views */}
-                        {view === "drugs" ? (
-                            <DrugIndex all={GUIDELINES} c={c} onSelectGuideline={setSelected}/>
-                        ) : view === "grid" ? (
-                            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))", gap:14 }}>
-                                {filtered.map(g=><GuidelineCard key={g.id} g={g} c={c} onSelect={setSelected} onCompare={toggleCompare} compareList={compareList}/>)}
-                            </div>
-                        ) : (
-                            <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-                                {filtered.map(g=>(
-                                    <div key={g.id} onClick={()=>setSelected(g)} style={{ background:c.card, border:`1px solid ${c.border}`, borderRadius:10, padding:"12px 16px", cursor:"pointer", display:"flex", alignItems:"center", gap:14, borderLeft:`4px solid ${g.color}` }}>
-                                        <span style={{ fontSize:24 }}>{g.icon}</span>
-                                        <div style={{ flex:1 }}>
-                                            <div style={{ fontWeight:700, color:c.text, fontSize:14 }}>{g.title} <span style={{ color:c.muted, fontWeight:400, fontSize:12 }}>— {g.subtitle}</span></div>
-                                            <div style={{ color:c.muted, fontSize:12, marginTop:2 }}>{g.dept} • {g.icd} • v{g.version} • 💊 {g.drugs.slice(0,3).join(", ")}</div>
-                                        </div>
-                                        <div style={{ display:"flex", gap:6, alignItems:"center" }}>
-                                            <Badge color={PCOLORS[g.priority]} sm>{PRIORITIES[g.priority]}</Badge>
-                                            <StatPill icon="👁️" value={g.views.toLocaleString()} label="" c={c}/>
-                                            <button onClick={e=>{e.stopPropagation();toggleCompare(g.id);}} style={{ padding:"3px 8px", background: compareList.includes(g.id)?g.color+"22":c.surface, border:`1px solid ${compareList.includes(g.id)?g.color:c.border}`, borderRadius:5, color: compareList.includes(g.id)?g.color:c.muted, fontSize:11, cursor:"pointer" }}>
-                                                {compareList.includes(g.id)?"✓":"+"} SS
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {filtered.length === 0 && (
-                            <div style={{ textAlign:"center", padding:"60px 0", color:c.muted }}>
-                                <div style={{ fontSize:48, marginBottom:12 }}>🔍</div>
-                                <div style={{ fontSize:16, fontWeight:600, marginBottom:6 }}>Không tìm thấy phác đồ</div>
-                                <div style={{ fontSize:13 }}>Thử thay đổi từ khoá hoặc bộ lọc</div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<GuidelineHub />);
-    </script>
+// ── INIT ─────────────────────────────────────────────────────────────────────
+mermaid.initialize({ startOnLoad: false });
+loadStored();
+</script>
 </body>
 </html>
