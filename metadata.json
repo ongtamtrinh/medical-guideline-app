@@ -1,0 +1,6 @@
+{
+  "name": "SBAR Medical Handover",
+  "description": "Ứng dụng bàn giao bệnh nhân chuyên nghiệp dành cho bác sĩ theo tiêu chuẩn SBAR.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
